@@ -3270,7 +3270,7 @@ END SUBROUTINE LidarSim_CalculateUVW
         "(rad)     ","(rad/s)   ","(rad/s^2) ","(rad)     ","(rad/s)   ","(rad/s^2) ", & 
         "(rad)     ","(rad/s)   ","(rad/s^2) ","(m)       ","(m/s)     ","(m/s^2)   ", & 
         "(m)       ","(m/s)     ","(m/s^2)   ","(m)       ","(m/s)     ","(m/s^2)   ", & 
-        "(rad)     ","(rad)     ","(s)       ","()        ","()        ","()        "/)
+        "(rad)     ","(rad)     ","(s)       ","(-)       ","(-)       ","(-)       "/)
     DO LoopCounter = 1,SizeOutput
         ParamUnitsAry( 24 + LoopCounter ) = "(m)       "
         ParamUnitsAry( 24 + SizeOutput + LoopCounter ) = "(m/s)     "
