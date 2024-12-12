@@ -9542,6 +9542,7 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
       TYPE(ED_ContinuousStateType)                 :: k4          ! RK4 constant; see above 
       TYPE(ED_ContinuousStateType)                 :: x_tmp       ! Holds temporary modification to x
       TYPE(ED_InputType)                           :: u_interp    ! interpolated value of inputs 
+      INTEGER(IntKi)                                :: I                 ! Loops through some or all of the DOFs.
 
       INTEGER(IntKi)                               :: ErrStat2    ! local error status
       CHARACTER(ErrMsgLen)                         :: ErrMsg2     ! local error message (ErrMsg)
@@ -9581,7 +9582,12 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
       CALL ED_CalcContStateDeriv( t, u_interp, p, x, xd, z, OtherState, m, xdot, ErrStat2, ErrMsg2 )
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
-
+        
+        DO I = 1,p%DOFs%NActvDOF
+            CALL WriteToFile(t, xdot%qt(p%DOFs%SrtPS(I)))
+            CAll WriteToFile(t, xdot%qdt(p%DOFs%SrtPS(I)))
+        ENDDO
+        
       k1%qt  = p%dt * xdot%qt
       k1%qdt = p%dt * xdot%qdt
   
@@ -9600,6 +9606,11 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
       CALL ED_CalcContStateDeriv( t + 0.5*p%dt, u_interp, p, x_tmp, xd, z, OtherState, m, xdot, ErrStat2, ErrMsg2 )
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
+         
+         DO I = 1,p%DOFs%NActvDOF
+            CALL WriteToFile(t, xdot%qt(p%DOFs%SrtPS(I)))
+            CALL WriteToFile(t, xdot%qdt(p%DOFs%SrtPS(I)))
+        ENDDO
 
       k2%qt  = p%dt * xdot%qt
       k2%qdt = p%dt * xdot%qdt
@@ -9614,6 +9625,11 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
       CALL ED_CalcContStateDeriv( t + 0.5*p%dt, u_interp, p, x_tmp, xd, z, OtherState, m, xdot, ErrStat2, ErrMsg2 )
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
+         
+         DO I = 1,p%DOFs%NActvDOF
+            CALL WriteToFile(t, xdot%qt(p%DOFs%SrtPS(I)))
+            CALL WriteToFile(t, xdot%qdt(p%DOFs%SrtPS(I)))
+        ENDDO
 
       k3%qt  = p%dt * xdot%qt
       k3%qdt = p%dt * xdot%qdt
@@ -9633,6 +9649,11 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
       CALL ED_CalcContStateDeriv( t + p%dt, u_interp, p, x_tmp, xd, z, OtherState, m, xdot, ErrStat2, ErrMsg2 )
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
+         
+         DO I = 1,p%DOFs%NActvDOF
+            CALL WriteToFile(t, xdot%qt(p%DOFs%SrtPS(I)))
+            CALL WriteToFile(t, xdot%qdt(p%DOFs%SrtPS(I)))
+        ENDDO
 
       k4%qt  = p%dt * xdot%qt
       k4%qdt = p%dt * xdot%qdt
@@ -11855,7 +11876,34 @@ SUBROUTINE ED_GetOP( t, u, p, x, xd, z, OtherState, y, m, ErrStat, ErrMsg, u_op,
 
 END SUBROUTINE ED_GetOP
 !----------------------------------------------------------------------------------------------------------------------------------
+!> Routine to specific types of data into a .txt-file
+SUBROUTINE WriteToFile(Param1, Param2)
 
+    IMPLICIT NONE
+    CHARACTER(200) :: filename                    ! name of the .txt file
+    REAL(DbKi),    INTENT(IN) :: Param1         ! first parameter
+    REAL(DbKi),    INTENT(IN) :: Param2         ! second parameter
+    INTEGER :: unit, ios, I                     ! file-handle and error status
+    
+    filename = 'ElastoDyn_Extended_Outputs.txt'
+    
+    ! create/open file
+    OPEN(UNIT=unit, FILE=filename, STATUS='UNKNOWN', ACTION='WRITE', POSITION='APPEND', IOSTAT=ios)
+    
+    ! check for errors
+    IF (ios /= 0) THEN
+      PRINT *, "Error while opening the file:", filename
+      RETURN
+    END IF
+    
+    ! write contents into file
+    WRITE(unit, '(F16.12, ";", F16.12)') param1, param2
+    
+    ! close file
+    CLOSE(unit)
+    
+END SUBROUTINE WriteToFile
+!----------------------------------------------------------------------------------------------------------------------------------
 
 END MODULE ElastoDyn
 !**********************************************************************************************************************************
