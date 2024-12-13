@@ -9543,6 +9543,7 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
       TYPE(ED_ContinuousStateType)                 :: x_tmp       ! Holds temporary modification to x
       TYPE(ED_InputType)                           :: u_interp    ! interpolated value of inputs 
       INTEGER(IntKi)                                :: I                 ! Loops through some or all of the DOFs.
+      REAL(DbKi), DIMENSION(:), ALLOCATABLE               :: SolnVecTmp
 
       INTEGER(IntKi)                               :: ErrStat2    ! local error status
       CHARACTER(ErrMsgLen)                         :: ErrMsg2     ! local error message (ErrMsg)
@@ -9584,8 +9585,8 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          IF ( ErrStat >= AbortErrLev ) RETURN
         
         DO I = 1,p%DOFs%NActvDOF
-            CALL WriteToFile(t, xdot%qt(p%DOFs%SrtPS(I)))
-            CAll WriteToFile(t, xdot%qdt(p%DOFs%SrtPS(I)))
+            SolnVecTmp = m%AugMat( p%DOFs%SrtPS( 1:p%DOFs%NActvDOF ), p%DOFs%SrtPSNAUG(1+p%DOFs%NActvDOF) )
+            CALL WriteToFile(t, SolnVecTmp(I))
         ENDDO
         
       k1%qt  = p%dt * xdot%qt
@@ -9607,9 +9608,9 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
          
-         DO I = 1,p%DOFs%NActvDOF
-            CALL WriteToFile(t, xdot%qt(p%DOFs%SrtPS(I)))
-            CALL WriteToFile(t, xdot%qdt(p%DOFs%SrtPS(I)))
+        DO I = 1,p%DOFs%NActvDOF
+            SolnVecTmp = m%AugMat( p%DOFs%SrtPS( 1:p%DOFs%NActvDOF ), p%DOFs%SrtPSNAUG(1+p%DOFs%NActvDOF) )
+            CALL WriteToFile(t, SolnVecTmp(I))
         ENDDO
 
       k2%qt  = p%dt * xdot%qt
@@ -9626,9 +9627,9 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
          
-         DO I = 1,p%DOFs%NActvDOF
-            CALL WriteToFile(t, xdot%qt(p%DOFs%SrtPS(I)))
-            CALL WriteToFile(t, xdot%qdt(p%DOFs%SrtPS(I)))
+        DO I = 1,p%DOFs%NActvDOF
+            SolnVecTmp = m%AugMat( p%DOFs%SrtPS( 1:p%DOFs%NActvDOF ), p%DOFs%SrtPSNAUG(1+p%DOFs%NActvDOF) )
+            CALL WriteToFile(t, SolnVecTmp(I))
         ENDDO
 
       k3%qt  = p%dt * xdot%qt
@@ -9649,10 +9650,10 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
       CALL ED_CalcContStateDeriv( t + p%dt, u_interp, p, x_tmp, xd, z, OtherState, m, xdot, ErrStat2, ErrMsg2 )
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
-         
-         DO I = 1,p%DOFs%NActvDOF
-            CALL WriteToFile(t, xdot%qt(p%DOFs%SrtPS(I)))
-            CALL WriteToFile(t, xdot%qdt(p%DOFs%SrtPS(I)))
+        
+        DO I = 1,p%DOFs%NActvDOF
+            SolnVecTmp = m%AugMat( p%DOFs%SrtPS( 1:p%DOFs%NActvDOF ), p%DOFs%SrtPSNAUG(1+p%DOFs%NActvDOF) )
+            CALL WriteToFile(t, SolnVecTmp(I))
         ENDDO
 
       k4%qt  = p%dt * xdot%qt
@@ -11886,6 +11887,7 @@ SUBROUTINE WriteToFile(Param1, Param2)
     INTEGER :: unit, ios, I                     ! file-handle and error status
     
     filename = 'ElastoDyn_Extended_Outputs.txt'
+    unit = 10
     
     ! create/open file
     OPEN(UNIT=unit, FILE=filename, STATUS='UNKNOWN', ACTION='WRITE', POSITION='APPEND', IOSTAT=ios)
@@ -11897,7 +11899,7 @@ SUBROUTINE WriteToFile(Param1, Param2)
     END IF
     
     ! write contents into file
-    WRITE(unit, '(F16.12, ";", F16.12)') param1, param2
+    WRITE(unit, '(F8.4, ";", F24.8)') param1, param2
     
     ! close file
     CLOSE(unit)
