@@ -9583,10 +9583,10 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
       CALL ED_CalcContStateDeriv( t, u_interp, p, x, xd, z, OtherState, m, xdot, ErrStat2, ErrMsg2 )
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
-        
-        DO I = 1,p%DOFs%NActvDOF
-            SolnVecTmp = m%AugMat( p%DOFs%SrtPS( 1:p%DOFs%NActvDOF ), p%DOFs%SrtPSNAUG(1+p%DOFs%NActvDOF) )
-            CALL WriteToFile(t, SolnVecTmp(I))
+         
+        DO I = 1,3
+            CALL WriteToFile(t, 1.0)
+            CALL WriteToFile(t, m%RtHS%MomLPRott(I))
         ENDDO
         
       k1%qt  = p%dt * xdot%qt
@@ -9608,9 +9608,9 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
          
-        DO I = 1,p%DOFs%NActvDOF
-            SolnVecTmp = m%AugMat( p%DOFs%SrtPS( 1:p%DOFs%NActvDOF ), p%DOFs%SrtPSNAUG(1+p%DOFs%NActvDOF) )
-            CALL WriteToFile(t, SolnVecTmp(I))
+        DO I = 1,3
+            CALL WriteToFile(t, 1.0)
+            CALL WriteToFile(t, m%RtHS%MomLPRott(I))
         ENDDO
 
       k2%qt  = p%dt * xdot%qt
@@ -9627,9 +9627,9 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
          
-        DO I = 1,p%DOFs%NActvDOF
-            SolnVecTmp = m%AugMat( p%DOFs%SrtPS( 1:p%DOFs%NActvDOF ), p%DOFs%SrtPSNAUG(1+p%DOFs%NActvDOF) )
-            CALL WriteToFile(t, SolnVecTmp(I))
+        DO I = 1,3
+            CALL WriteToFile(t, 1.0)
+            CALL WriteToFile(t, m%RtHS%MomLPRott(I))
         ENDDO
 
       k3%qt  = p%dt * xdot%qt
@@ -9651,9 +9651,9 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
         
-        DO I = 1,p%DOFs%NActvDOF
-            SolnVecTmp = m%AugMat( p%DOFs%SrtPS( 1:p%DOFs%NActvDOF ), p%DOFs%SrtPSNAUG(1+p%DOFs%NActvDOF) )
-            CALL WriteToFile(t, SolnVecTmp(I))
+        DO I = 1,3
+            CALL WriteToFile(t, 1.0)
+            CALL WriteToFile(t, m%RtHS%MomLPRott(I))
         ENDDO
 
       k4%qt  = p%dt * xdot%qt
@@ -11883,7 +11883,7 @@ SUBROUTINE WriteToFile(Param1, Param2)
     IMPLICIT NONE
     CHARACTER(200) :: filename                    ! name of the .txt file
     REAL(DbKi),    INTENT(IN) :: Param1         ! first parameter
-    REAL(DbKi),    INTENT(IN) :: Param2         ! second parameter
+    REAL(ReKi),    INTENT(IN) :: Param2         ! second parameter
     INTEGER :: unit, ios, I                     ! file-handle and error status
     
     filename = 'ElastoDyn_Extended_Outputs.txt'

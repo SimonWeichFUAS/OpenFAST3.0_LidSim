@@ -31,17 +31,18 @@ copyfile([CompilationDir, FASTexeFile], [SimulationDir, FASTexeFile]);
 copyfile([CompilationDir, FASTmapFile], [SimulationDir, FASTmapFile]);
 
 % Configuration parameters for ExtendedElastics
-ExtendedElastics.Config.ActvDOFs    = [ "TFA1", "GEN" ];                                % Names of considered degrees of freedom
-ExtendedElastics.Config.InitX       = [ 0.2893,  0               ];                     % Initialization continous states
-ExtendedElastics.Config.InitXdot    = [ 0,       rpm2radPs(7.56) ];                     % Initialization continous differential states
-ExtendedElastics.Config.TMax        = 30.00;                                               % [s] Simulation time
-ExtendedElastics.Config.dt          = 0.01;                                             % [s] Simulation time step
+ExtendedElastics.Config.ActvDOFs    = [ "TFA1", "GEN" ];                        % Names of considered degrees of freedom
+ExtendedElastics.Config.InitX       = [ 0.2893,  0               ];             % Initialization continous states
+ExtendedElastics.Config.InitXdot    = [ 0,       rpm2radPs(7.56) ];             % Initialization continous differential states
+ExtendedElastics.Config.TMax        = 30.0;                                     % [s] Simulation time
+ExtendedElastics.Config.dt          = 0.01;                                     % [s] Simulation time step
 
 % Model parameters for ExtendedElastics
-ExtendedElastics.Model.TFA1         = load('MassMatrix_Elements_TFA1.mat');
-ExtendedElastics.Model.GEN          = load('MassMatrix_Elements_GEN.mat');
-
-disp('Start!!!')
+ExtendedElastics.Model.CoordSys.xs  = [ 0.994063451, -0.108801906, 0.0 ];        % [-] Vector in xs-direction (Shaft cs., see definiion in IEC) 
+ExtendedElastics.Model.TFA1         = load('MassMatrix_Elements_TFA1.mat');     % Get pre-computed elements of the TFA1 mass-matrx 
+ExtendedElastics.Model.GEN          = load('MassMatrix_Elements_GEN.mat');      % Get pre-computed elements of the GEN mass-matrix
+ExtendedElastics.Model.GEN.GenTq    = 1.978676995881853e+07;                    % [Nm] Constant generator torque for above rated wind conditions; delcared as an input in ElastoDyn
+ExtendedElastics.Model.GEN.GbRatio  = 1;                                        % [-]  Gearbox ratio                        
 
 %% Run Simulation using OpenFAST
 
@@ -65,11 +66,11 @@ tmp                 = readmatrix(ExtendedElastics.Name, 'Delimiter', ';');
 % Get vector for simulation time
 ExtendedElastics.Time       = [];
 
-for iTime = 1:8:length(tmp)
+for iTime = 1:12:length(tmp)
     ExtendedElastics.Time   = [ExtendedElastics.Time; tmp(iTime,1)];
 end
 
-% Get data of active DOFs
+% Get data of active DOFs (for now, only the GEN-DOF is considered)
 ExtendedElastics.Data       = NaN;
 
 for nDOF = 1:length(ExtendedElastics.Config.ActvDOFs)
@@ -118,32 +119,14 @@ for iStep = 1:nStep
     k1_x_dot            = dt * q1_dot;
     
     [q2, q2_dot]        = CalcContStateDeriv(iStep, 2, X_dot, ExtendedElastics);
-    
-%     if iStep == 1
-%         q2      = [ 3.506766084234116E-006, 0.791681528185107];
-%         q2_dot  = [ 6.797096509388153E-004, -1.463191325634362E-004];
-%     end
-
     k2_x                = dt * q2;
     k2_x_dot            = dt * q2_dot;
     
     [q3, q3_dot]        = CalcContStateDeriv(iStep, 3, X_dot, ExtendedElastics);
-
-%     if iStep == 1
-%         q3      = [ 3.398548254694077E-006, 0.791680617681834];
-%         q3_dot  = [ 6.797711387217663E-004, -1.462964465472831E-004];
-%     end
-
     k3_x                = dt * q3;
     k3_x_dot            = dt * q3_dot;
     
     [q4, q4_dot]        = CalcContStateDeriv(iStep, 4, X_dot, ExtendedElastics);
-
-%     if iStep == 1
-%         q4      = [ 6.797711387217663E-006, 0.791679886313031];
-%         q4_dot  = [ 6.584424715407079E-004, -3.292818529356665E-004];
-%     end
-    
     k4_x                = dt * q4;
     k4_x_dot            = dt * q4_dot;
 
@@ -200,17 +183,41 @@ function [q, q_dot] = CalcContStateDeriv(iStep, nk,  X_dot, Parameters)
     MassMatrix          = zeros(2,2);
     MassMatrix(1,1)     = Parameters.Model.TFA1.Masses_TFA1(iStep);
     MassMatrix(2,2)     = Parameters.Model.GEN.Masses_GEN(iStep);
-    RtHdSd              = Parameters.Data((1+(iStep-1)*4) + (nk - 1), :)';
+    RtHdSd              = GetRtHdSd(iStep, nk, Parameters);
 
     q                   = X_dot(iStep, :);     
-    q_dot               = (MassMatrix\RtHdSd)';
+    q_dot               = (MassMatrix\RtHdSd')';
 
 end
 
 
+% Get values of the right-hand-side of the ODE
+function RtHdSd = GetRtHdSd(iStep, nk, Parameters)
+    
+    % Parameters required for looping through the provied data sets
+    nk_max  = 4;        % Number of Runge-Kutta stages
+    nAx     = 3;        % Number of considered axes
+    
+    % TFA1 motion
+    RtHdSd(1)   = Parameters.Data(1,1);
 
+    % GEN motion
+    CoordSys_xs = Parameters.Model.CoordSys.xs;
+    GbRatio     = Parameters.Model.GEN.GbRatio;
+    GenTq_HSS   = Parameters.Model.GEN.GenTq;
+    GenTq_LSS   = GenTq_HSS * GbRatio;
+    
+    for iAx = 1:1:3
+        DataIndex       = (iStep - 1) * (nk_max * nAx) + (nk - 1) * nAx + iAx;
+        MomLPRott(iAx)  = Parameters.Data(DataIndex,2);
+    end
 
+    RtHdSd(2)   = dot(MomLPRott, CoordSys_xs) - GenTq_LSS;
 
+    %RtHdSd(2)   = (RtHSdat%PAngVelEL(DOF_GeAz,0,:) * RtHSdat%MomLPRott) - GenTq_LSS
+    
+
+end
 
 
 
