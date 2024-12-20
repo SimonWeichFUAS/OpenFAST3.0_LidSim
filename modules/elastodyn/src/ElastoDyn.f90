@@ -9544,9 +9544,13 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
       TYPE(ED_InputType)                           :: u_interp    ! interpolated value of inputs 
       INTEGER(IntKi)                                :: I                 ! Loops through some or all of the DOFs.
       INTEGER(IntKi)                                :: J                 ! Counter for elements
-      REAL(DbKi), DIMENSION(:), ALLOCATABLE               :: SolnVecTmp
+      INTEGER(IntKi)                                :: K
+      REAL(DbKi), DIMENSION(:), ALLOCATABLE         :: SolnVecTmp
+      REAL(ReKi)                                    :: TmpVec    (3)
       REAL(ReKi)                                    :: TmpVec1   (3)
-      REAL(ReKi)                                    :: TmpVec3   (3)                                
+      REAL(ReKi)                                    :: TmpVec2   (3)
+      REAL(ReKi)                                    :: TmpVec3   (3)
+      REAL(ReKi)                                    :: TmpVec4   (3)
       REAL(ReKi)                                    :: TmpVal    
       
       INTEGER(IntKi)                               :: ErrStat2    ! local error status
@@ -9588,38 +9592,10 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
          
-        DO I = 1,3
-            CALL WriteToFile(t, DOT_PRODUCT( m%RtHS%PLinVelEO(DOF_TFA1,0,:), m%RtHS%FrcONcRtt  ) + DOT_PRODUCT( m%RtHS%PAngVelEB(DOF_TFA1,0,:), m%RtHS%MomBNcRtt), 1)
-            CALL WriteToFile(t, m%RtHS%MomLPRott(I), 1)
-        ENDDO
-        
-        !! mass-effect yaw bearing   
-        !TmpVec1 = -p%YawBrMass*( p%Gravity*m%CoordSys%z2 + m%RtHS%LinAccEOt )
-        !write(*,*) DOT_PRODUCT( m%RtHS%PLinVelEO(p%DOFs%PTTE(1),0,:), TmpVec1)
-        
-        !! mass-effect tower nodes
-        !TmpVal = 0
-        !DO J = 1,p%TwrNodes
-        !    TmpVec1 = ( m%RtHS%FTHydrot(:,J) )*p%DHNodes(J) &
-        !      - p%TElmntMass(J)*( p%Gravity*m%CoordSys%z2 + m%RtHS%LinAccETt(:,J) )
-        !    TmpVec3 = ( m%RtHS%MFHydrot(:,J) )*p%DHNodes(J)
-        !    DO I = 1,p%DOFs%NPTTE    ! Loop through all active (enabled) tower DOFs that contribute to the QD2T-related linear accelerations of the tower
-        !        TmpVal = TmpVal +  DOT_PRODUCT( m%RtHS%PLinVelET(J,p%DOFs%PTTE(I),0,:), TmpVec1        ) +  DOT_PRODUCT( m%RtHS%PAngVelEF(J,p%DOFs%PTTE(I),0,:), TmpVec3)    !       and TmpVec3 is still the total external moment to tower element J
-        !    ENDDO 
-        !ENDDO
-        !CALL WritetoFile(t, TmpVal, 1)
-        
-        ! elasticity and damping focres
-        !write(*,*) - p%KTFA(1,1)*x%QT( DOF_TFA1) - p%CTFA(1,1)*x%QDT(DOF_TFA1)
-        !CALL WriteToFile(t, p%CTFA(1,1), 1)
-        
-        !! external forces
-        !!write(*,*) DOT_PRODUCT( m%RtHS%PLinVelEO(DOF_TFA1,0,:), m%RtHS%FrcONcRtt) +  DOT_PRODUCT( m%RtHS%PAngVelEB(DOF_TFA1,0,:), m%RtHS%MomBNcRtt  )
-        !CALL WritetoFile(t, DOT_PRODUCT( m%RtHS%PLinVelEO(DOF_TFA1,0,:), m%RtHS%FrcONcRtt) +  DOT_PRODUCT( m%RtHS%PAngVelEB(DOF_TFA1,0,:), m%RtHS%MomBNcRtt  ), 1)
-        
-        !! right-hand-side
-        !write(*,*) m%AugMat(DOF_TFA1,         p%NAug)
-        !write(*,*)
+         CALL WriteToFile(t, xdot%qt(DOF_TFA1), 2)
+         CALL WriteToFile(t, xdot%qt(DOF_GeAz), 2)
+         CALL WriteToFile(t, xdot%qdt(DOF_TFA1), 2)
+         CALL WriteToFile(t, xdot%qdt(DOF_GeAz), 2)
         
       k1%qt  = p%dt * xdot%qt
       k1%qdt = p%dt * xdot%qdt
@@ -9640,36 +9616,11 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
          
-        DO I = 1,3
-            CALL WriteToFile(t, DOT_PRODUCT( m%RtHS%PLinVelEO(DOF_TFA1,0,:), m%RtHS%FrcONcRtt  ) + DOT_PRODUCT( m%RtHS%PAngVelEB(DOF_TFA1,0,:), m%RtHS%MomBNcRtt), 1)
-            CALL WriteToFile(t, m%RtHS%MomLPRott(I), 1)
-        ENDDO
+         CALL WriteToFile(t, xdot%qt(DOF_TFA1), 2)
+         CALL WriteToFile(t, xdot%qt(DOF_GeAz), 2)
+         CALL WriteToFile(t, xdot%qdt(DOF_TFA1), 2)
+         CALL WriteToFile(t, xdot%qdt(DOF_GeAz), 2)
          
-        !! mass-effect yaw bearing   
-        !TmpVec1 = -p%YawBrMass*( p%Gravity*m%CoordSys%z2 + m%RtHS%LinAccEOt )
-        !write(*,*) DOT_PRODUCT( m%RtHS%PLinVelEO(p%DOFs%PTTE(1),0,:), TmpVec1)
-        !CALL WriteToFile(t, DOT_PRODUCT( m%RtHS%PLinVelEO(p%DOFs%PTTE(1),0,:), TmpVec1), 1)
-        
-        !! mass-effect tower nodes
-        !TmpVal = 0
-        !DO J = 1,p%TwrNodes
-        !    TmpVec1 = ( m%RtHS%FTHydrot(:,J) )*p%DHNodes(J) &
-        !      - p%TElmntMass(J)*( p%Gravity*m%CoordSys%z2 + m%RtHS%LinAccETt(:,J) )
-        !    TmpVec3 = ( m%RtHS%MFHydrot(:,J) )*p%DHNodes(J)
-        !    DO I = 1,p%DOFs%NPTTE    ! Loop through all active (enabled) tower DOFs that contribute to the QD2T-related linear accelerations of the tower
-        !        TmpVal = TmpVal +  DOT_PRODUCT( m%RtHS%PLinVelET(J,p%DOFs%PTTE(I),0,:), TmpVec1        ) +  DOT_PRODUCT( m%RtHS%PAngVelEF(J,p%DOFs%PTTE(I),0,:), TmpVec3)    !       and TmpVec3 is still the total external moment to tower element J
-        !    ENDDO 
-        !ENDDO
-        !CALL WritetoFile(t, TmpVal, 1)
-         
-        ! elasticity and damping focres
-        !write(*,*) - p%KTFA(1,1)*x%QT( DOF_TFA1) - p%CTFA(1,1)*x%QDT(DOF_TFA1)
-        !CALL WriteToFile(t, p%CTFA(1,1), 1)
-         
-        !! external forces
-        !!write(*,*) DOT_PRODUCT( m%RtHS%PLinVelEO(DOF_TFA1,0,:), m%RtHS%FrcONcRtt) +  DOT_PRODUCT( m%RtHS%PAngVelEB(DOF_TFA1,0,:), m%RtHS%MomBNcRtt  )
-        !CALL WritetoFile(t, DOT_PRODUCT( m%RtHS%PLinVelEO(DOF_TFA1,0,:), m%RtHS%FrcONcRtt) +  DOT_PRODUCT( m%RtHS%PAngVelEB(DOF_TFA1,0,:), m%RtHS%MomBNcRtt  ), 1)
-        
       k2%qt  = p%dt * xdot%qt
       k2%qdt = p%dt * xdot%qdt
 
@@ -9684,35 +9635,10 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
          
-        DO I = 1,3
-            CALL WriteToFile(t, DOT_PRODUCT( m%RtHS%PLinVelEO(DOF_TFA1,0,:), m%RtHS%FrcONcRtt  ) + DOT_PRODUCT( m%RtHS%PAngVelEB(DOF_TFA1,0,:), m%RtHS%MomBNcRtt), 1)
-            CALL WriteToFile(t, m%RtHS%MomLPRott(I), 1)
-        ENDDO
-         
-        ! ! mass-effect yaw bearing   
-        !TmpVec1 = -p%YawBrMass*( p%Gravity*m%CoordSys%z2 + m%RtHS%LinAccEOt )
-        !write(*,*) DOT_PRODUCT( m%RtHS%PLinVelEO(p%DOFs%PTTE(1),0,:), TmpVec1)
-        !CALL WriteToFile(t, DOT_PRODUCT( m%RtHS%PLinVelEO(p%DOFs%PTTE(1),0,:), TmpVec1), 1)
-        
-        !! mass-effect tower nodes
-        !TmpVal = 0
-        !DO J = 1,p%TwrNodes
-        !    TmpVec1 = ( m%RtHS%FTHydrot(:,J) )*p%DHNodes(J) &
-        !      - p%TElmntMass(J)*( p%Gravity*m%CoordSys%z2 + m%RtHS%LinAccETt(:,J) )
-        !    TmpVec3 = ( m%RtHS%MFHydrot(:,J) )*p%DHNodes(J)
-        !    DO I = 1,p%DOFs%NPTTE    ! Loop through all active (enabled) tower DOFs that contribute to the QD2T-related linear accelerations of the tower
-        !        TmpVal = TmpVal +  DOT_PRODUCT( m%RtHS%PLinVelET(J,p%DOFs%PTTE(I),0,:), TmpVec1        ) +  DOT_PRODUCT( m%RtHS%PAngVelEF(J,p%DOFs%PTTE(I),0,:), TmpVec3)    !       and TmpVec3 is still the total external moment to tower element J
-        !    ENDDO 
-        !ENDDO
-        !CALL WritetoFile(t, TmpVal, 1)
-         
-        ! elasticity and damping focres
-        !write(*,*) - p%KTFA(1,1)*x%QT( DOF_TFA1) - p%CTFA(1,1)*x%QDT(DOF_TFA1)
-        !CALL WriteToFile(t, p%CTFA(1,1), 1)
-         
-        !! external forces
-        !!write(*,*) DOT_PRODUCT( m%RtHS%PLinVelEO(DOF_TFA1,0,:), m%RtHS%FrcONcRtt) +  DOT_PRODUCT( m%RtHS%PAngVelEB(DOF_TFA1,0,:), m%RtHS%MomBNcRtt  )
-        !CALL WritetoFile(t, DOT_PRODUCT( m%RtHS%PLinVelEO(DOF_TFA1,0,:), m%RtHS%FrcONcRtt) +  DOT_PRODUCT( m%RtHS%PAngVelEB(DOF_TFA1,0,:), m%RtHS%MomBNcRtt  ), 1)
+         CALL WriteToFile(t, xdot%qt(DOF_TFA1), 2)
+         CALL WriteToFile(t, xdot%qt(DOF_GeAz), 2)
+         CALL WriteToFile(t, xdot%qdt(DOF_TFA1), 2)
+         CALL WriteToFile(t, xdot%qdt(DOF_GeAz), 2)
 
       k3%qt  = p%dt * xdot%qt
       k3%qdt = p%dt * xdot%qdt
@@ -9733,35 +9659,10 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
         
-        DO I = 1,3
-            CALL WriteToFile(t, DOT_PRODUCT( m%RtHS%PLinVelEO(DOF_TFA1,0,:), m%RtHS%FrcONcRtt  ) + DOT_PRODUCT( m%RtHS%PAngVelEB(DOF_TFA1,0,:), m%RtHS%MomBNcRtt), 1)
-            CALL WriteToFile(t, m%RtHS%MomLPRott(I), 1)
-        ENDDO
-         
-        ! ! mass-effect yaw bearing   
-        !TmpVec1 = -p%YawBrMass*( p%Gravity*m%CoordSys%z2 + m%RtHS%LinAccEOt )
-        !write(*,*) DOT_PRODUCT( m%RtHS%PLinVelEO(p%DOFs%PTTE(1),0,:), TmpVec1)
-        !CALL WriteToFile(t, DOT_PRODUCT( m%RtHS%PLinVelEO(p%DOFs%PTTE(1),0,:), TmpVec1), 1)
-
-        !! mass-effect tower nodes
-        !TmpVal = 0
-        !DO J = 1,p%TwrNodes
-        !    TmpVec1 = ( m%RtHS%FTHydrot(:,J) )*p%DHNodes(J) &
-        !      - p%TElmntMass(J)*( p%Gravity*m%CoordSys%z2 + m%RtHS%LinAccETt(:,J) )
-        !    TmpVec3 = ( m%RtHS%MFHydrot(:,J) )*p%DHNodes(J)
-        !    DO I = 1,p%DOFs%NPTTE    ! Loop through all active (enabled) tower DOFs that contribute to the QD2T-related linear accelerations of the tower
-        !        TmpVal = TmpVal +  DOT_PRODUCT( m%RtHS%PLinVelET(J,p%DOFs%PTTE(I),0,:), TmpVec1        ) +  DOT_PRODUCT( m%RtHS%PAngVelEF(J,p%DOFs%PTTE(I),0,:), TmpVec3)    !       and TmpVec3 is still the total external moment to tower element J
-        !    ENDDO 
-        !ENDDO
-        !CALL WritetoFile(t, TmpVal, 1)
-
-        ! elasticity and damping focres
-        !write(*,*) - p%KTFA(1,1)*x%QT( DOF_TFA1) - p%CTFA(1,1)*x%QDT(DOF_TFA1)
-         
-        !! external forces
-        !!write(*,*) DOT_PRODUCT( m%RtHS%PLinVelEO(DOF_TFA1,0,:), m%RtHS%FrcONcRtt) +  DOT_PRODUCT( m%RtHS%PAngVelEB(DOF_TFA1,0,:), m%RtHS%MomBNcRtt  )
-        !CALL WritetoFile(t, DOT_PRODUCT( m%RtHS%PLinVelEO(DOF_TFA1,0,:), m%RtHS%FrcONcRtt) +  DOT_PRODUCT( m%RtHS%PAngVelEB(DOF_TFA1,0,:), m%RtHS%MomBNcRtt  ), 1)
-        
+         CALL WriteToFile(t, xdot%qt(DOF_TFA1), 2)
+         CALL WriteToFile(t, xdot%qt(DOF_GeAz), 2)
+         CALL WriteToFile(t, xdot%qdt(DOF_TFA1), 2)
+         CALL WriteToFile(t, xdot%qdt(DOF_GeAz), 2)
 
       k4%qt  = p%dt * xdot%qt
       k4%qdt = p%dt * xdot%qdt

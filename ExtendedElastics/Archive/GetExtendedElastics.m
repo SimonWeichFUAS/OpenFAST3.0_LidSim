@@ -31,7 +31,7 @@ ExtendedElastics.Name   = 'ElastoDyn_Extended_Outputs.txt';
 ExtendedElastics.Config.ActvDOFs            = [ "TFA1", "GEN" ];                        % Names of considered degrees of freedom
 ExtendedElastics.Config.InitX               = [ 0.2893,  0               ];             % Initialization continous states
 ExtendedElastics.Config.InitXdot            = [ 0,       rpm2radPs(7.56) ];             % Initialization continous differential states
-ExtendedElastics.Config.TMax                = 30.0;                                     % [s] Simulation time
+ExtendedElastics.Config.TMax                = 0.05;                                     % [s] Simulation time
 ExtendedElastics.Config.dt                  = 0.01;                                     % [s] Simulation time step
 
 % Model parameters for ExtendedElastics
@@ -183,7 +183,7 @@ ylabel({'TTdispFA'; '[m]'})
 
 subplot(n_plot,1,4)
 hold on; grid on; box on
-plot(Time, (TTdispFA_FAST./TTdispFA_RepEl - 1)*100, '-o')
+plot(Time, (TTdispFA_FAST./TTdispFA_RepEl - 1)*100, '-o')       % (Rep-FAST)/SteayState
 ylabel({'TTdispFA'; '[%]'})
 xlabel('time [s]')
 
