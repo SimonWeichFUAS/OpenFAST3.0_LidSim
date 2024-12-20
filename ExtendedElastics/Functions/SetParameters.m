@@ -84,7 +84,7 @@ function p = SetParameters(InputFileData)
     p.HubHt         = p.TowerHt + InputFileData.Twr2Shft + p.OverHang*p.SShftTilt;
 
     %% Outputs
-    p.MaxOutputs    = 6;        % 3 GeAz / 3 TFA1
+    p.MaxOutputs    = 8;        % 4 GeAz / 4 TFA1
    
 
     %% Set blade and tower parameters

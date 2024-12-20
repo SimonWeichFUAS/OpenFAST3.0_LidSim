@@ -1,5 +1,5 @@
 % This function saves the simulation outputs
-function m = SaveOutputs(iStep, p, m)
+function [m, y] = SaveOutputs(iStep, p, m, y)
 
     % Save outputs
     m.Results.qt(p.DOF_TFA1, iStep + 1)     = m.AllOuts(p.Q_TFA1);
@@ -10,5 +10,8 @@ function m = SaveOutputs(iStep, p, m)
 
     m.Results.qd2t(p.DOF_TFA1, iStep + 1)   = m.AllOuts(p.QD2_TFA1);
     m.Results.qd2t(p.DOF_GeAz, iStep + 1)   = m.AllOuts(p.QD2_GeAz);
+
+    y.RotSpeed(iStep + 1)   = m.AllOuts(p.QD_GeAz);
+    %y.TTDspFA(iStep + 1)    = ;    % Will be represented through the yaw bearing motion
 
 end

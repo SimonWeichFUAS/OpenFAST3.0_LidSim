@@ -9592,11 +9592,10 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
          
-         CALL WriteToFile(t, xdot%qt(DOF_TFA1), 2)
-         CALL WriteToFile(t, xdot%qt(DOF_GeAz), 2)
-         CALL WriteToFile(t, xdot%qdt(DOF_TFA1), 2)
-         CALL WriteToFile(t, xdot%qdt(DOF_GeAz), 2)
-        
+        DO I = 1,p%DOFs%NActvDOF 
+            CALL WriteToFile(t, m%SolnVec(I), 2)    
+        ENDDO
+       
       k1%qt  = p%dt * xdot%qt
       k1%qdt = p%dt * xdot%qdt
   
@@ -9616,10 +9615,9 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
          
-         CALL WriteToFile(t, xdot%qt(DOF_TFA1), 2)
-         CALL WriteToFile(t, xdot%qt(DOF_GeAz), 2)
-         CALL WriteToFile(t, xdot%qdt(DOF_TFA1), 2)
-         CALL WriteToFile(t, xdot%qdt(DOF_GeAz), 2)
+         DO I = 1,p%DOFs%NActvDOF 
+            CALL WriteToFile(t, m%SolnVec(I), 2)    
+         ENDDO
          
       k2%qt  = p%dt * xdot%qt
       k2%qdt = p%dt * xdot%qdt
@@ -9635,11 +9633,10 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
          
-         CALL WriteToFile(t, xdot%qt(DOF_TFA1), 2)
-         CALL WriteToFile(t, xdot%qt(DOF_GeAz), 2)
-         CALL WriteToFile(t, xdot%qdt(DOF_TFA1), 2)
-         CALL WriteToFile(t, xdot%qdt(DOF_GeAz), 2)
-
+         DO I = 1,p%DOFs%NActvDOF 
+            CALL WriteToFile(t, m%SolnVec(I), 2)    
+         ENDDO
+         
       k3%qt  = p%dt * xdot%qt
       k3%qdt = p%dt * xdot%qdt
 
@@ -9659,11 +9656,10 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
         
-         CALL WriteToFile(t, xdot%qt(DOF_TFA1), 2)
-         CALL WriteToFile(t, xdot%qt(DOF_GeAz), 2)
-         CALL WriteToFile(t, xdot%qdt(DOF_TFA1), 2)
-         CALL WriteToFile(t, xdot%qdt(DOF_GeAz), 2)
-
+         DO I = 1,p%DOFs%NActvDOF 
+            CALL WriteToFile(t, m%SolnVec(I), 2)    
+         ENDDO
+         
       k4%qt  = p%dt * xdot%qt
       k4%qdt = p%dt * xdot%qdt
 
@@ -11896,7 +11892,7 @@ SUBROUTINE WriteToFile(Param1, Param2, TypeSwitch)
     INTEGER :: unit, ios, I                     ! file-handle and error status
     
     REAL(ReKi) :: Param2_ReKi                     ! local variable with single precision
-    REAL(DbKi) :: Param2_DbKi                     ! local variable with double precision
+    REAL(R8Ki) :: Param2_R8Ki                     ! local variable with double precision
     
     filename = 'ElastoDyn_Extended_Outputs.txt'
     unit = 10
@@ -11916,17 +11912,17 @@ SUBROUTINE WriteToFile(Param1, Param2, TypeSwitch)
         SELECT TYPE (Param2)
         TYPE IS (REAL(ReKi))
             Param2_ReKi = Param2
-            WRITE(unit, '(F8.4, ";", F24.8)') Param1, Param2_ReKi
+            WRITE(unit, '(F8.4, ";", F25.22)') Param1, Param2_ReKi
         CLASS DEFAULT
             PRINT *, "Error: Param2 does not match expected type REAL(ReKi)."
         END SELECT
     CASE (2)  ! type DbKi 
         SELECT TYPE (Param2)
-        TYPE IS (REAL(DbKi))
-            Param2_DbKi = Param2
-            WRITE(unit, '(F8.4, ";", F24.8)') Param1, Param2_DbKi
+        TYPE IS (REAL(R8Ki))
+            Param2_R8Ki = Param2
+            WRITE(unit, '(F8.4, ";", F25.22)') Param1, Param2_R8Ki
         CLASS DEFAULT
-            PRINT *, "Error: Param2 does not match expected type REAL(DbKi)."
+            PRINT *, "Error: Param2 does not match expected type REAL(R8Ki)."
         END SELECT
     CASE DEFAULT
         PRINT *, "Error: Invalid TypeSwitch value."

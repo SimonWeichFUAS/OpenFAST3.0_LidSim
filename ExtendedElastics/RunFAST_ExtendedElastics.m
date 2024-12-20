@@ -55,14 +55,14 @@ p                           = SetParameters(InputFileData);
 x                           = Init_ContStates(p, InputFileData);
 m                           = Init_MiscOtherStates(p, x, InputFileData);
 u                           = Init_u(p, x, InputFileData, m, ExtendedOutputs);
-m                           = Init_Outputs(p, x, InputFileData, m);
+[m, y]                      = Init_Outputs(p, x, InputFileData, m);
 
 % Simulation routine
 for iStep = 1:p.Tend/p.dt
     
-    [x, m]  = UpdateStates(iStep, u, p, x, m);
-    m       = CalcOutputs(u, p, x, m);
-    m       = SaveOutputs(iStep, p, m);
+    [u, x, m]   = UpdateStates(iStep, u, p, x, m);
+    m           = CalcOutputs(u, p, x, m);
+    [m, y]      = SaveOutputs(iStep, p, m, y);
 
 end
 
@@ -75,7 +75,7 @@ if PlotResults
     % Allocate channels
     Time            = Binaries.Time;
     Omega_FAST      = Binaries.RotSpeed;
-    Omega_ExEl      = m.Results.qdt(p.DOF_GeAz,:)';
+    Omega_ExEl      = y.RotSpeed;
     TTdispFA_FAST   = Binaries.TTDspFA;
     TTdispFA_ExEl   = m.Results.qt(p.DOF_TFA1,:)';
     
