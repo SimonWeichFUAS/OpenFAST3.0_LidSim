@@ -19,4 +19,7 @@ function [m, y] = Init_Outputs(p, x, InputFileData, m)
     m.Results.qd2t(p.DOF_TFA1, 1)   = 0;        % Probably needs a different approach
     m.Results.qd2t(p.DOF_GeAz, 1)   = 0;        % for initilizing the accelerations
 
+    y.TTDspFA(1)                    = x.qt(p.DOF_TFA1);
+    y.RotSpeed(1)                   = x.qdt(p.DOF_GeAz);
+
 end
