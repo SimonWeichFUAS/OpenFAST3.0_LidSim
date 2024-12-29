@@ -25,6 +25,7 @@ InputFileData.TipRad        = 120.97;               % [m]   The distance from th
 InputFileData.HubRad        = 3.97;                 % [m]   The distance from the rotor apex to the blade root
 InputFileData.Precone       = -4.0;                 % [deg] Cone angle (assumed to be the same for every blade)
 InputFileData.HubCM         = 0.0;                  % [m]   Distance from rotor apex to hub mass
+InputFileData.UndSling      = 0.0;                  % [m]   Undersling length (unused for this configuration)
 InputFileData.AzimB1Up      = 0.0;                  % [deg] Azimuth value to use for I/O when blade 1 points up
 InputFileData.OverHang      = -12.097571763912535;  % [m]   Distance from yaw axis to rotor apex
 InputFileData.ShftGagL      = 0.0;                  % [m]   Distance from rotor apex to shaft strain gages
@@ -50,7 +51,7 @@ InputFileData.YawBrMass     = 28280;                % [kg]    Yaw bearing mass
 InputFileData.PtfmMass      = 0.0;                  % [kg]    Platform mass
 
 %% Blade
-InputFileData.BldNodes      = 50;                   % [-]     Number of blade nodes per blade
+InputFileData.BldNodes      = 50.0;                 % [-]     Number of blade nodes per blade
 
 %% Drivetrain
 InputFileData.GBoxEff       = 100.0;                % [prcnt] Gearbox efficiency

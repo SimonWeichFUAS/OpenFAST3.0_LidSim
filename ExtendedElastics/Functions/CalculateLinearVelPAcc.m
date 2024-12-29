@@ -12,6 +12,12 @@ function m = CalculateLinearVelPAcc(p, x, m)
     
     %% (Partial) Linear velocity of the nacelle CoM (point U) in the inertia frame (body E - earth)
     m.RtHS.PLinVelEU(:,:,:)             = m.RtHS.PLinVelEO(:,:,:); 
+
+    for I = 1:p.DOFs.NPN
+        TmpVec0                                 = cross( m.RtHS.PAngVelEN(1, :, p.DOFs.PN(I)), m.RtHS.rOU ); 
+
+        m.RtHS.PLinVelEU(1, :, p.DOFs.PN(I))    = m.RtHS.PLinVelEU(1, :, p.DOFs.PN(I)) + TmpVec0;
+    end     % All DOFs associated with the angular motion of the nacelle
     
     %% (Partial) Linear velocity of a point on the furl axis (point V) in the inertia frame (body E - earth)
     m.RtHS.PLinVelEV(:,:,:)             = m.RtHS.PLinVelEO(:,:,:);

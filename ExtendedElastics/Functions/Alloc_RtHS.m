@@ -6,6 +6,7 @@ function m = Alloc_RtHS(p, m)
     %% Positios
     m.RtHS.rT           = AllocStruct(dims, p.TwrNodes);
     m.RtHS.rS0S         = AllocStruct(dims, p.TipNode, p.NumBl);
+    m.RtHS.rP0          = AllocStruct(dims, p.NumBl);
     m.RtHS.rQS          = AllocStruct(dims, p.TipNode+1, p.NumBl);
 
     %% Tower
@@ -32,7 +33,10 @@ function m = Alloc_RtHS(p, m)
     
     %% Forces and Moments
     m.RtHS.PFrcS0B      = AllocStruct(dims, p.NumBl, p.NDOF);
+    m.RtHS.PMomH0B      = AllocStruct(dims, p.NumBl, p.NDOF);
     m.RtHS.PFrcPRot     = AllocStruct(dims, p.NDOF);
+    m.RtHS.PMomLPRot    = AllocStruct(dims, p.NDOF);
     m.RtHS.PFrcONcRt    = AllocStruct(dims, p.NDOF);
+    m.RtHS.PMomBNcRt    = AllocStruct(dims, p.NDOF);
 
 end

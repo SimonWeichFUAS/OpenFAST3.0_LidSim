@@ -27,6 +27,12 @@ function p = SetParameters(InputFileData)
     p.GBoxEff   = InputFileData.GBoxEff;
     p.GBRatio   = InputFileData.GBoxRatio;
 
+    if p.NumBl == 2
+        p.UndSling  = InputFileData.UndSling;
+    else
+        p.UndSling  = 0.0;
+    end
+
     p.TipMass   = AllocStruct(p.NumBl);
     p.TipMass   = InputFileData.TipMass;
     
@@ -63,13 +69,15 @@ function p = SetParameters(InputFileData)
     p.DOFs.NPUE             = 0;
     p.DOFs.NPR              = 0;
     p.DOFs.NPH              = 0;
+    p.DOFs.NPN              = 0;
     if p.DOF_Flag(p.DOF_TFA1) 
         p.DOFs.NPCE         = p.DOFs.NPCE + 1;
         p.DOFs.NPTTE        = p.DOFs.NPTTE + 1;
         p.DOFs.NPSE(:)      = p.DOFs.NPSE(:) + 1;
         p.DOFs.NPUE         = p.DOFs.NPUE + 1;
         p.DOFs.NPR          = p.DOFs.NPR + 1;
-        p.DOFs.NPH          = p.DOFs.NPH +1;
+        p.DOFs.NPH          = p.DOFs.NPH + 1;
+        p.DOFs.NPN          = p.DOFs.NPN + 1;
         
         p.DOFs.PCE(p.DOFs.NPCE)         = p.DOF_TFA1;
         p.DOFs.PTTE(p.DOFs.NPUE)        = p.DOF_TFA1;
@@ -77,6 +85,7 @@ function p = SetParameters(InputFileData)
         p.DOFs.PUE(p.DOFs.NPUE)         = p.DOF_TFA1;
         p.DOFs.PR(p.DOFs.NPR)           = p.DOF_TFA1;
         p.DOFs.PH(p.DOFs.NPH)           = p.DOF_TFA1;
+        p.DOFs.PN(p.DOFs.NPN)           = p.DOF_TFA1;
     end
     if p.DOF_Flag(p.DOF_GeAz)
         p.DOFs.NPCE         = p.DOFs.NPCE + 1;
@@ -134,6 +143,10 @@ function p = SetParameters(InputFileData)
    
 
     %% Set blade and tower parameters
+    p.Hubg1Iner                 = InputFileData.HubIner;    % Note: This only applies for a 3-bladed rotor
+    p.Hubg2Iner                 = 0.0;
+    p.Nacd2Iner                 = InputFileData.NacYIner - p.NacMass*(p.NacCMxn^2 + p.NacCMyn^2);
+
     p.BElmntMass                = AllocStruct(p.BldNodes, p.NumBl);
     p.BElmntMass(:,1)           = [ 7072.006;       6289.146;       5464.652;       4621.369;       4056.955;
                                     3646.652;       3003.224;       2464.755;       2022.612;       1695.428;
