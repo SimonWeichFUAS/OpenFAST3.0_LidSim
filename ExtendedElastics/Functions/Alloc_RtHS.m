@@ -5,6 +5,8 @@ function m = Alloc_RtHS(p, m)
 
     %% Positios
     m.RtHS.rT           = AllocStruct(dims, p.TwrNodes);
+    m.RtHS.rS0S         = AllocStruct(dims, p.TipNode, p.NumBl);
+    m.RtHS.rQS          = AllocStruct(dims, p.TipNode+1, p.NumBl);
 
     %% Tower
     m.RtHS.rZT          = AllocStruct(dims, 0:p.TwrNodes);
@@ -14,13 +16,23 @@ function m = Alloc_RtHS(p, m)
 
     %% Angular Velocities
     m.RtHS.PAngVelEB    = AllocStruct(1:2,dims,p.NDOF);
+    m.RtHS.PAngVelEG    = AllocStruct(1:2,dims,p.NDOF);
+    m.RtHS.PAngVelEX    = AllocStruct(1:2,dims,p.NDOF);
+    m.RtHS.PAngVelER    = AllocStruct(1:2,dims,p.NDOF);
+    m.RtHS.PAngVelEN    = AllocStruct(1:2,dims,p.NDOF);
+    m.RtHS.PAngVelEL    = AllocStruct(1:2,dims,p.NDOF);
+    m.RtHS.PANgVelEH    = AllocStruct(1:2,dims,p.NDOF);
 
     %% Linear Velocities
     m.RtHS.PLinVelEO    = AllocStruct(1:2,dims,p.NDOF);
+    m.RtHS.PLinVelES    = AllocStruct(1:2,dims,p.NDOF,0:p.TipNode,p.NumBl);
     m.RtHS.PLinVelET    = AllocStruct(1:2,dims,p.NDOF,1:p.TwrNodes);
+    m.RtHS.PLinVelEC    = AllocStruct(1:2,dims,p.NDOF);
     m.RtHS.PLinVelEU    = AllocStruct(1:2,dims,p.NDOF);
     
     %% Forces and Moments
-    m.RtHS.PFrcONcRt    = AllocStruct(3, p.NDOF);
+    m.RtHS.PFrcS0B      = AllocStruct(dims, p.NumBl, p.NDOF);
+    m.RtHS.PFrcPRot     = AllocStruct(dims, p.NDOF);
+    m.RtHS.PFrcONcRt    = AllocStruct(dims, p.NDOF);
 
 end

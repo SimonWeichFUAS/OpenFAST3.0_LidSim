@@ -1,6 +1,6 @@
 %
 % Main script for performing elastic simulations based on the
-% ElastoDyn-Module of OpenFast
+% ElastoDyn-Module of OpenFAST
 %
 %% Setup
 
@@ -18,6 +18,7 @@ CompilationDir          = '..\build\bin\';
 SimulationDir           = '..\..\LidarAssistedControl\Release\IEA15MW_01\';
 SimualationName         = 'IEA-15-240-RWT-Monopile';
 ExtendedOutputsName     = 'ElastoDyn_Extended_Outputs.txt';
+ExtendedInputsName      = 'ElastoDyn_Extended_Inputs.txt';
 
 FASTexeFile             = 'openfast_x64.exe';
 FASTmapFile             = 'MAP_x64.dll';
@@ -37,7 +38,11 @@ if ~exist([SimualationName, '.outb'])
     movefile([SimualationName, '.outb'], [WorkingDir, SimualationName, '.outb'])        % Move binaries
 
     if exist(ExtendedOutputsName)
-        movefile(ExtendedOutputsName, [WorkingDir, ExtendedOutputsName])                % Move extended elastics
+        movefile(ExtendedOutputsName, [WorkingDir, ExtendedOutputsName])                % Move extended outputs
+    end
+
+    if exist(ExtendedInputsName)
+        movefile(ExtendedInputsName, [WorkingDir, ExtendedInputsName])                % Move extended inputs
     end
     
     delete(FASTexeFile)                                                                 % Delete executable
@@ -49,12 +54,14 @@ end
 %% Main routine for running elastic simulations
 
 % Initialization routine
-[Binaries, ExtendedOutputs] = GetExtendedFASTOutputs(SimualationName , ExtendedOutputsName);
+[   Binaries, ...
+    ExtendedOutputs, ...
+    ExtendedInputs ]        = GetExtendedFASTOutputs(SimualationName , ExtendedOutputsName, ExtendedInputsName);
 InputFileData               = ElasticInputs_IEA15MW;
 p                           = SetParameters(InputFileData);
 x                           = Init_ContStates(p, InputFileData);
 m                           = Init_MiscOtherStates(p, x, InputFileData);
-u                           = Init_u(p, x, InputFileData, m, ExtendedOutputs);
+u                           = Init_u(p, x, InputFileData, m, ExtendedOutputs, ExtendedInputs);
 [m, y]                      = Init_Outputs(p, x, InputFileData, m);
 
 % Simulation routine

@@ -38,6 +38,9 @@ InputFileData.TowerBsHt     = 15.0;                 % [m]   Height of tower base
 InputFileData.PtfmRefzt     = 15.0;                 % [m]   Vertical distance from the ground level Vertical distance from the ground level
 
 %% Mass an Inertia
+InputFileData.TipMass(1)    = 0.0;                  % [kg]    Tip-brake mass for blade 1
+InputFileData.TipMass(2)    = 0.0;                  % [kg]    Tip-brake mass for blade 2
+InputFileData.TipMass(3)    = 0.0;                  % [kg]    Tip-brake mass for blade 3
 InputFileData.HubMass       = 69360;                % [kg]    Hub mass
 InputFileData.HubIner       = 973520;               % [kgm^2] Hub inertia about rotor axis 
 InputFileData.GenIner       = 1836784;              % [kgm^2] Generator inertia about HSS
@@ -45,6 +48,9 @@ InputFileData.NacMass       = 646895;               % [kg]    Nacelle mass
 InputFileData.NacYIner      = 24240914;             % [kgm^2] Nacelle inertia about yaw axis
 InputFileData.YawBrMass     = 28280;                % [kg]    Yaw bearing mass
 InputFileData.PtfmMass      = 0.0;                  % [kg]    Platform mass
+
+%% Blade
+InputFileData.BldNodes      = 50;                   % [-]     Number of blade nodes per blade
 
 %% Drivetrain
 InputFileData.GBoxEff       = 100.0;                % [prcnt] Gearbox efficiency

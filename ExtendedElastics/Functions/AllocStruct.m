@@ -2,7 +2,9 @@
 % If only one input is given, create a 1xSize1 NaN vector
 % If two inputs are given, create an Size2xSize1 NaN matrix
 % If three inputs are given, create a Size3xSize2xSize1 NaN array
-function OutStruct  = AllocStruct(Size1, Size2, Size3, Size4)
+% If four inputs are given, create a Size4xSize3xSize2xSize1 NaN array
+% If five inputs are given, create a Size5xSize4xSize3xSize2xSize1 NaN array
+function OutStruct  = AllocStruct(Size1, Size2, Size3, Size4, Size5)
 
     if nargin >= 1
         if isvector(Size1) && numel(Size1) > 1
@@ -24,7 +26,7 @@ function OutStruct  = AllocStruct(Size1, Size2, Size3, Size4)
         Dim2 = 1;
     end
 
-    if nargin == 3
+    if nargin >= 3
         if isvector(Size3) && numel(Size3) > 1
             Dim3 = numel(Size3); 
         else
@@ -34,7 +36,7 @@ function OutStruct  = AllocStruct(Size1, Size2, Size3, Size4)
         Dim3 = 1; 
     end
 
-    if nargin == 4
+    if nargin >= 4
         if isvector(Size4) && numel(Size4) > 1
             Dim4 = numel(Size4); 
         else
@@ -44,6 +46,16 @@ function OutStruct  = AllocStruct(Size1, Size2, Size3, Size4)
         Dim4 = 1; 
     end
 
-    OutStruct = NaN(Dim1, Dim2, Dim3, Dim4);
+    if nargin == 5
+        if isvector(Size5) && numel(Size5) > 1
+            Dim5 = numel(Size5); 
+        else
+            Dim5 = Size5; 
+        end
+    else
+        Dim5 = 1; 
+    end
+
+    OutStruct = NaN(Dim1, Dim2, Dim3, Dim4, Dim5);
 
 end

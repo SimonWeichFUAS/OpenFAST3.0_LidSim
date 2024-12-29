@@ -9586,7 +9586,9 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
 !      HSSBrTrq_at_t = u_interp%HSSBrTrqC
 !      OtherState%HSSBrTrqC = SIGN( u_interp%HSSBrTrqC, x%QDT(DOF_GeAz) )         
 !      OtherState%HSSBrTrq  = OtherState%HSSBrTrqC         
-
+    
+         CALL WriteToFileInputs(t, u_interp%BlPitchCom(1), 1)
+         
       ! find xdot at t
       CALL ED_CalcContStateDeriv( t, u_interp, p, x, xd, z, OtherState, m, xdot, ErrStat2, ErrMsg2 )
          CALL CheckError(ErrStat2,ErrMsg2)
@@ -11967,7 +11969,7 @@ SUBROUTINE ED_GetOP( t, u, p, x, xd, z, OtherState, y, m, ErrStat, ErrMsg, u_op,
 
 END SUBROUTINE ED_GetOP
 !----------------------------------------------------------------------------------------------------------------------------------
-!> Routine to specific types of data into a .txt-file
+!> Routine to write specific types of data into a .txt-file
 SUBROUTINE WriteToFile(Param1, Param2, TypeSwitch)
 
     IMPLICIT NONE
@@ -12018,6 +12020,59 @@ SUBROUTINE WriteToFile(Param1, Param2, TypeSwitch)
     CLOSE(unit)
     
 END SUBROUTINE WriteToFile
+!----------------------------------------------------------------------------------------------------------------------------------
+!> Routine to write specific types of data into a .txt-file
+SUBROUTINE WriteToFileInputs(Param1, Param2, TypeSwitch)
+
+    IMPLICIT NONE
+    CHARACTER(200) :: filename                  ! name of the .txt file
+    REAL(DbKi),    INTENT(IN) :: Param1         ! first parameter
+    CLASS(*),      INTENT(IN) :: Param2         ! generic type for second parameter
+    INTEGER,       INTENT(IN) :: TypeSwitch     ! swicht for selecting the type of the second parameter
+    INTEGER :: unit, ios, I                     ! file-handle and error status
+    
+    REAL(ReKi) :: Param2_ReKi                     ! local variable with single precision
+    REAL(R8Ki) :: Param2_R8Ki                     ! local variable with double precision
+    
+    filename = 'ElastoDyn_Extended_Inputs.txt'
+    unit = 10
+    
+    ! create/open file
+    OPEN(UNIT=unit, FILE=filename, STATUS='UNKNOWN', ACTION='WRITE', POSITION='APPEND', IOSTAT=ios)
+    
+    ! check for errors
+    IF (ios /= 0) THEN
+      PRINT *, "Error while opening the file:", filename
+      RETURN
+    END IF
+    
+    ! write contents into file
+    SELECT CASE (TypeSwitch)
+    CASE (1)  ! type ReKi 
+        SELECT TYPE (Param2)
+        TYPE IS (REAL(ReKi))
+            Param2_ReKi = Param2
+            WRITE(unit, '(F8.4, ";", F30.16)') Param1, Param2_ReKi
+        CLASS DEFAULT
+            PRINT *, "Error: Param2 does not match expected type REAL(ReKi)."
+        END SELECT
+    CASE (2)  ! type DbKi 
+        SELECT TYPE (Param2)
+        TYPE IS (REAL(R8Ki))
+            Param2_R8Ki = Param2
+            WRITE(unit, '(F8.4, ";", F30.16)') Param1, Param2_R8Ki
+        CLASS DEFAULT
+            PRINT *, "Error: Param2 does not match expected type REAL(R8Ki)."
+        END SELECT
+    CASE DEFAULT
+        PRINT *, "Error: Invalid TypeSwitch value."
+    END SELECT
+    
+    ! close file
+    CLOSE(unit)
+    
+END SUBROUTINE WriteToFileInputs
+
 !----------------------------------------------------------------------------------------------------------------------------------
 
 END MODULE ElastoDyn

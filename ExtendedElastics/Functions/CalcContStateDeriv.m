@@ -2,8 +2,8 @@
 function [u, xdot, m] = CalcContStateDeriv(iStep, u, p, x, m, RK4_stage)
     
     % Initializtation 
-    u.InputData             = GetInputData(iStep, RK4_stage, u, p);
-    m                       = SetCoordSy(p, x, m);
+    u                       = GetInputData(iStep, RK4_stage, u, p);
+    m                       = SetCoordSy(p, x, m, u);
     m                       = CalculatePositions(p, x, m);
     m                       = CalculateAngularPosVelPAcc(p, x, m);
     m                       = CalculateLinearVelPAcc(p, x, m);

@@ -6,4 +6,8 @@ function CoordSys = Alloc_CoordSys(p)
     CoordSys.i2     = AllocStruct(p.NumBl, 3);
     CoordSys.i3     = AllocStruct(p.NumBl, 3);
 
+    CoordSys.j1     = AllocStruct(p.NumBl, 3);
+    CoordSys.j2     = AllocStruct(p.NumBl, 3);
+    CoordSys.j3     = AllocStruct(p.NumBl, 3);
+    
 end
