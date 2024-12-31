@@ -17,8 +17,9 @@ WorkingDir              = [cd, '\'];
 CompilationDir          = '..\build\bin\';
 SimulationDir           = '..\..\LidarAssistedControl\Release\IEA15MW_01\';
 SimualationName         = 'IEA-15-240-RWT-Monopile';
-ExtendedOutputsName     = 'ElastoDyn_Extended_Outputs.txt';
 ExtendedInputsName      = 'ElastoDyn_Extended_Inputs.txt';
+ExtendedForcesName      = 'ElastoDyn_Extended_Forces.txt';
+ExtendedMomentsName     = 'ElastoDyn_Extended_Moments.txt';
 
 FASTexeFile             = 'openfast_x64.exe';
 FASTmapFile             = 'MAP_x64.dll';
@@ -37,12 +38,16 @@ if ~exist([SimualationName, '.outb'])
     dos([FASTexeFile, ' ', SimualationName, '.fst']);                                   % Run simulation
     movefile([SimualationName, '.outb'], [WorkingDir, SimualationName, '.outb'])        % Move binaries
 
-    if exist(ExtendedOutputsName)
-        movefile(ExtendedOutputsName, [WorkingDir, ExtendedOutputsName])                % Move extended outputs
+    if exist(ExtendedInputsName)
+        movefile(ExtendedInputsName, [WorkingDir, ExtendedInputsName])                  % Move extended inputs
     end
 
-    if exist(ExtendedInputsName)
-        movefile(ExtendedInputsName, [WorkingDir, ExtendedInputsName])                % Move extended inputs
+    if exist(ExtendedForcesName)
+        movefile(ExtendedForcesName, [WorkingDir, ExtendedForcesName])                  % Move extended forces
+    end
+
+    if exist(ExtendedMomentsName)
+        movefile(ExtendedMomentsName, [WorkingDir, ExtendedMomentsName])                % Move extended moments
     end
     
     delete(FASTexeFile)                                                                 % Delete executable
@@ -55,13 +60,19 @@ end
 
 % Initialization routine
 [   Binaries, ...
-    ExtendedOutputs, ...
-    ExtendedInputs ]        = GetExtendedFASTOutputs(SimualationName , ExtendedOutputsName, ExtendedInputsName);
+    ExtendedInputs, ...
+    ExtendedForces, ...
+    ExtendedMoments ]       = GetExtendedFASTOutputs(   SimualationName , ...
+                                                        ExtendedInputsName, ...
+                                                        ExtendedForcesName, ...
+                                                        ExtendedMomentsName);
 InputFileData               = ElasticInputs_IEA15MW;
 p                           = SetParameters(InputFileData);
 x                           = Init_ContStates(p, InputFileData);
 m                           = Init_MiscOtherStates(p, x, InputFileData);
-u                           = Init_u(p, x, InputFileData, m, ExtendedOutputs, ExtendedInputs);
+u                           = Init_u(p, x, InputFileData, m, ExtendedInputs, ...
+                                                             ExtendedForces, ...
+                                                             ExtendedMoments);
 [m, y]                      = Init_Outputs(p, x, InputFileData, m);
 
 % Simulation routine

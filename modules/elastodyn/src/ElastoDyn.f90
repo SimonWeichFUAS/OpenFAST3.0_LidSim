@@ -9587,38 +9587,25 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
 !      OtherState%HSSBrTrqC = SIGN( u_interp%HSSBrTrqC, x%QDT(DOF_GeAz) )         
 !      OtherState%HSSBrTrq  = OtherState%HSSBrTrqC         
     
-         CALL WriteToFileInputs(t, u_interp%BlPitchCom(1), 1)
+        ! Write certain components of u_interp at t into .txt-files
+        CALL WriteToFileInputs(t, u_interp%BlPitchCom(1), 1)
+         
+        DO K = 1,p%NumBl
+            DO J = 1,p%BldNodes
+                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(1, J), 1)
+                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(2, J), 1)
+                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(3, J), 1)
+                
+                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(1, J), 1)
+                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(2, J), 1)
+                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(3, J), 1)
+            ENDDO   ! J - Number of blade nodes/elements
+        ENDDO   ! K - Number of blades
          
       ! find xdot at t
       CALL ED_CalcContStateDeriv( t, u_interp, p, x, xd, z, OtherState, m, xdot, ErrStat2, ErrMsg2 )
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
-        
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PFrcONcRt(I,p%DOFs%SrtPS(1)), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PMomBNcRt(I,p%DOFs%SrtPS(1)), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PFrcONcRt(I,p%DOFs%SrtPS(2)), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PMomBNcRt(I,p%DOFs%SrtPS(2)), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%FrcONcRtt(I), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%MomBNcRtt(I), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PMomLPRot(I,p%DOFs%SrtPS(2)), 1) 
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%MomLPRott(I), 1)
-        ENDDO
-        
         
       k1%qt  = p%dt * xdot%qt
       k1%qdt = p%dt * xdot%qdt
@@ -9632,37 +9619,27 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          IF ( ErrStat >= AbortErrLev ) RETURN
 !      u_interp%HSSBrTrqC = max(0.0_ReKi, min(u_interp%HSSBrTrqC, HSSBrTrq_at_t )) ! hack for extrapolation of limits       
 !      OtherState%HSSBrTrqC = SIGN( u_interp%HSSBrTrqC, x_tmp%QDT(DOF_GeAz) )         
-!      OtherState%HSSBrTrq  = OtherState%HSSBrTrqC         
+!      OtherState%HSSBrTrq  = OtherState%HSSBrTrqC   
+         
+        ! Write certain components of u_interp at t+dt/2 into .txt-files
+        CALL WriteToFileInputs(t, u_interp%BlPitchCom(1), 1)
+         
+        DO K = 1,p%NumBl
+            DO J = 1,p%BldNodes
+                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(1, J), 1)
+                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(2, J), 1)
+                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(3, J), 1)
+                
+                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(1, J), 1)
+                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(2, J), 1)
+                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(3, J), 1)
+            ENDDO   ! J - Number of blade nodes/elements
+        ENDDO   ! K - Number of blades
 
       ! find xdot at t + dt/2
       CALL ED_CalcContStateDeriv( t + 0.5*p%dt, u_interp, p, x_tmp, xd, z, OtherState, m, xdot, ErrStat2, ErrMsg2 )
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
-         
-         DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PFrcONcRt(I,p%DOFs%SrtPS(1)), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PMomBNcRt(I,p%DOFs%SrtPS(1)), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PFrcONcRt(I,p%DOFs%SrtPS(2)), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PMomBNcRt(I,p%DOFs%SrtPS(2)), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%FrcONcRtt(I), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%MomBNcRtt(I), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PMomLPRot(I,p%DOFs%SrtPS(2)), 1) 
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%MomLPRott(I), 1)
-        ENDDO
         
       k2%qt  = p%dt * xdot%qt
       k2%qdt = p%dt * xdot%qdt
@@ -9673,36 +9650,26 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
       ! find xdot at t + dt/2
 !      u_interp%HSSBrTrqC = max(0.0_ReKi, min(u_interp%HSSBrTrqC, HSSBrTrq_at_t )) ! hack for extrapolation of limits       
 !      OtherState%HSSBrTrqC = SIGN( u_interp%HSSBrTrqC, x_tmp%QDT(DOF_GeAz) )         
-!      OtherState%HSSBrTrq  = OtherState%HSSBrTrqC         
+!      OtherState%HSSBrTrq  = OtherState%HSSBrTrqC  
+      
+        ! Write certain components of u_interp at t+dt/2 into .txt-files
+        CALL WriteToFileInputs(t, u_interp%BlPitchCom(1), 1)
+         
+        DO K = 1,p%NumBl
+            DO J = 1,p%BldNodes
+                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(1, J), 1)
+                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(2, J), 1)
+                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(3, J), 1)
+                
+                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(1, J), 1)
+                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(2, J), 1)
+                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(3, J), 1)
+            ENDDO   ! J - Number of blade nodes/elements
+        ENDDO   ! K - Number of blades
+        
       CALL ED_CalcContStateDeriv( t + 0.5*p%dt, u_interp, p, x_tmp, xd, z, OtherState, m, xdot, ErrStat2, ErrMsg2 )
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
-         
-         
-         DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PFrcONcRt(I,p%DOFs%SrtPS(1)), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PMomBNcRt(I,p%DOFs%SrtPS(1)), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PFrcONcRt(I,p%DOFs%SrtPS(2)), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PMomBNcRt(I,p%DOFs%SrtPS(2)), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%FrcONcRtt(I), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%MomBNcRtt(I), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PMomLPRot(I,p%DOFs%SrtPS(2)), 1) 
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%MomLPRott(I), 1)
-        ENDDO
         
       k3%qt  = p%dt * xdot%qt
       k3%qdt = p%dt * xdot%qdt
@@ -9716,38 +9683,28 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          IF ( ErrStat >= AbortErrLev ) RETURN
 !      u_interp%HSSBrTrqC = max(0.0_ReKi, min(u_interp%HSSBrTrqC, HSSBrTrq_at_t )) ! hack for extrapolation of limits       
 !      OtherState%HSSBrTrqC = SIGN( u_interp%HSSBrTrqC, x_tmp%QDT(DOF_GeAz) )         
-!      OtherState%HSSBrTrq  = OtherState%HSSBrTrqC         
+!      OtherState%HSSBrTrq  = OtherState%HSSBrTrqC  
+         
+        ! Write certain components of u_interp at t+dt into .txt-files
+        CALL WriteToFileInputs(t, u_interp%BlPitchCom(1), 1)
+         
+        DO K = 1,p%NumBl
+            DO J = 1,p%BldNodes
+                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(1, J), 1)
+                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(2, J), 1)
+                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(3, J), 1)
+                
+                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(1, J), 1)
+                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(2, J), 1)
+                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(3, J), 1)
+            ENDDO   ! J - Number of blade nodes/elements
+        ENDDO   ! K - Number of blades
 
       ! find xdot at t + dt
       CALL ED_CalcContStateDeriv( t + p%dt, u_interp, p, x_tmp, xd, z, OtherState, m, xdot, ErrStat2, ErrMsg2 )
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
-        
-         DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PFrcONcRt(I,p%DOFs%SrtPS(1)), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PMomBNcRt(I,p%DOFs%SrtPS(1)), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PFrcONcRt(I,p%DOFs%SrtPS(2)), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PMomBNcRt(I,p%DOFs%SrtPS(2)), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%FrcONcRtt(I), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%MomBNcRtt(I), 1)
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%PMomLPRot(I,p%DOFs%SrtPS(2)), 1) 
-        ENDDO
-        DO I = 1,3
-            CALL WriteToFile(t, m%RtHS%MomLPRott(I), 1)
-        ENDDO
-        
+
       k4%qt  = p%dt * xdot%qt
       k4%qdt = p%dt * xdot%qdt
 
@@ -12035,7 +11992,7 @@ SUBROUTINE WriteToFileInputs(Param1, Param2, TypeSwitch)
     REAL(R8Ki) :: Param2_R8Ki                     ! local variable with double precision
     
     filename = 'ElastoDyn_Extended_Inputs.txt'
-    unit = 10
+    unit = 11
     
     ! create/open file
     OPEN(UNIT=unit, FILE=filename, STATUS='UNKNOWN', ACTION='WRITE', POSITION='APPEND', IOSTAT=ios)
@@ -12072,6 +12029,110 @@ SUBROUTINE WriteToFileInputs(Param1, Param2, TypeSwitch)
     CLOSE(unit)
     
 END SUBROUTINE WriteToFileInputs
+!----------------------------------------------------------------------------------------------------------------------------------
+!> Routine to write specific types of data into a .txt-file
+SUBROUTINE WriteToFileForces(Param1, Param2, TypeSwitch)
+
+    IMPLICIT NONE
+    CHARACTER(200) :: filename                  ! name of the .txt file
+    REAL(DbKi),    INTENT(IN) :: Param1         ! first parameter
+    CLASS(*),      INTENT(IN) :: Param2         ! generic type for second parameter
+    INTEGER,       INTENT(IN) :: TypeSwitch     ! swicht for selecting the type of the second parameter
+    INTEGER :: unit, ios, I                     ! file-handle and error status
+    
+    REAL(ReKi) :: Param2_ReKi                     ! local variable with single precision
+    REAL(R8Ki) :: Param2_R8Ki                     ! local variable with double precision
+    
+    filename = 'ElastoDyn_Extended_Forces.txt'
+    unit = 12
+    
+    ! create/open file
+    OPEN(UNIT=unit, FILE=filename, STATUS='UNKNOWN', ACTION='WRITE', POSITION='APPEND', IOSTAT=ios)
+    
+    ! check for errors
+    IF (ios /= 0) THEN
+      PRINT *, "Error while opening the file:", filename
+      RETURN
+    END IF
+    
+    ! write contents into file
+    SELECT CASE (TypeSwitch)
+    CASE (1)  ! type ReKi 
+        SELECT TYPE (Param2)
+        TYPE IS (REAL(ReKi))
+            Param2_ReKi = Param2
+            WRITE(unit, '(F8.4, ";", F30.16)') Param1, Param2_ReKi
+        CLASS DEFAULT
+            PRINT *, "Error: Param2 does not match expected type REAL(ReKi)."
+        END SELECT
+    CASE (2)  ! type DbKi 
+        SELECT TYPE (Param2)
+        TYPE IS (REAL(R8Ki))
+            Param2_R8Ki = Param2
+            WRITE(unit, '(F8.4, ";", F30.16)') Param1, Param2_R8Ki
+        CLASS DEFAULT
+            PRINT *, "Error: Param2 does not match expected type REAL(R8Ki)."
+        END SELECT
+    CASE DEFAULT
+        PRINT *, "Error: Invalid TypeSwitch value."
+    END SELECT
+    
+    ! close file
+    CLOSE(unit)
+    
+END SUBROUTINE WriteToFileForces
+!----------------------------------------------------------------------------------------------------------------------------------
+!> Routine to write specific types of data into a .txt-file
+SUBROUTINE WriteToFileMoments(Param1, Param2, TypeSwitch)
+
+    IMPLICIT NONE
+    CHARACTER(200) :: filename                  ! name of the .txt file
+    REAL(DbKi),    INTENT(IN) :: Param1         ! first parameter
+    CLASS(*),      INTENT(IN) :: Param2         ! generic type for second parameter
+    INTEGER,       INTENT(IN) :: TypeSwitch     ! swicht for selecting the type of the second parameter
+    INTEGER :: unit, ios, I                     ! file-handle and error status
+    
+    REAL(ReKi) :: Param2_ReKi                     ! local variable with single precision
+    REAL(R8Ki) :: Param2_R8Ki                     ! local variable with double precision
+    
+    filename = 'ElastoDyn_Extended_Moments.txt'
+    unit = 13
+    
+    ! create/open file
+    OPEN(UNIT=unit, FILE=filename, STATUS='UNKNOWN', ACTION='WRITE', POSITION='APPEND', IOSTAT=ios)
+    
+    ! check for errors
+    IF (ios /= 0) THEN
+      PRINT *, "Error while opening the file:", filename
+      RETURN
+    END IF
+    
+    ! write contents into file
+    SELECT CASE (TypeSwitch)
+    CASE (1)  ! type ReKi 
+        SELECT TYPE (Param2)
+        TYPE IS (REAL(ReKi))
+            Param2_ReKi = Param2
+            WRITE(unit, '(F8.4, ";", F30.16)') Param1, Param2_ReKi
+        CLASS DEFAULT
+            PRINT *, "Error: Param2 does not match expected type REAL(ReKi)."
+        END SELECT
+    CASE (2)  ! type DbKi 
+        SELECT TYPE (Param2)
+        TYPE IS (REAL(R8Ki))
+            Param2_R8Ki = Param2
+            WRITE(unit, '(F8.4, ";", F30.16)') Param1, Param2_R8Ki
+        CLASS DEFAULT
+            PRINT *, "Error: Param2 does not match expected type REAL(R8Ki)."
+        END SELECT
+    CASE DEFAULT
+        PRINT *, "Error: Invalid TypeSwitch value."
+    END SELECT
+    
+    ! close file
+    CLOSE(unit)
+    
+END SUBROUTINE WriteToFileMoments
 
 !----------------------------------------------------------------------------------------------------------------------------------
 

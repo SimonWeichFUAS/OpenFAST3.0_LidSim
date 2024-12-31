@@ -66,19 +66,19 @@ function [u, m] = FillAugMat(p, x, m, u)
         end
 
         m.AugMat(p.DOF_TFA1, p.NAug)    = m.AugMat(p.DOF_TFA1, p.NAug) ...
-                                        + dot( m.RtHS.PLinVelEO(1, :, p.DOF_TFA1), u.ExtOutp((13:15)) ) ...
-                                        + dot( m.RtHS.PAngVelEB(1, :, p.DOF_TFA1), u.ExtOutp((16:18)) );
+                                        + dot( m.RtHS.PLinVelEO(1, :, p.DOF_TFA1), m.RtHS.FrcONcRtt ) ...
+                                        + dot( m.RtHS.PAngVelEB(1, :, p.DOF_TFA1), m.RtHS.MomBNcRtt );
     end
     
     TmpVec  = p.GenIner*m.CoordSys.c1*dot( m.CoordSys.c1, m.RtHS.PAngVelEG(1, :, p.DOF_GeAz));
     if p.DOF_Flag(p.DOF_GeAz)
         for I = p.DOFs.Diag(p.DOF_GeAz):p.DOFs.NActvDOF
             m.AugMat(p.DOFs.SrtPS(I), p.DOF_GeAz)   =  -dot( m.RtHS.PAngVelEL(1, :, p.DOF_GeAz), ...
-                                                                 u.ExtOutp((19:21)));
+                                                                m.RtHS.PMomLPRot(:, p.DOFs.SrtPS(I)));
         end
         
-        m.AugMat(p.DOF_GeAz, p.NAug)        = dot( m.RtHS.PAngVelEL(1, :, p.DOF_GeAz), u.ExtOutp((22:24))) - GBoxTrq;
-
+        m.AugMat(p.DOF_GeAz, p.NAug)        = dot( (m.RtHS.PAngVelEL(1, :, p.DOF_GeAz))', m.RtHS.MomLPRott) - GBoxTrq;
+        
         m.AugMat(p.DOF_GeAz, p.DOF_GeAz)    = m.AugMat(p.DOF_GeAz, p.DOF_GeAz) ...
                                             + dot( m.RtHS.PAngVelEG(1, :, p.DOF_GeAz), TmpVec);
 

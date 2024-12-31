@@ -7,7 +7,7 @@ function [u, xdot, m] = CalcContStateDeriv(iStep, u, p, x, m, RK4_stage)
     m                       = CalculatePositions(p, x, m);
     m                       = CalculateAngularPosVelPAcc(p, x, m);
     m                       = CalculateLinearVelPAcc(p, x, m);
-    m                       = CalculateForcesMoments(p, x, m);
+    m                       = CalculateForcesMoments(p, x, m, u);
 
     [u, m]                  = FillAugMat(p, x, m, u);
 
