@@ -1,4 +1,9 @@
-% This function is used to define the internal coordinate systems for this particular step
+% -------------------------------------------------------------------------
+%
+% This function is used to define the internal coordinate systems 
+% for this particular step
+%
+% -------------------------------------------------------------------------
 function m = SetCoordSy(p, x, m, u)
     
     % Inertial frame coordinate system
@@ -26,7 +31,6 @@ function m = SetCoordSy(p, x, m, u)
     m.CoordSys.d1   = m.CoordSys.b1;    % Reasonable, since DOF_Yaw is not included
     m.CoordSys.d2   = m.CoordSys.b2;
     m.CoordSys.d3   = m.CoordSys.b3;
-
 
     % Rotor-furl coordinate system 
     m.CoordSys.rf1  = m.CoordSys.d1;    % Reasonable, since Rotor-Furl is not included

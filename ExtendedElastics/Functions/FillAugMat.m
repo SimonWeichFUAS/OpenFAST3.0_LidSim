@@ -1,4 +1,8 @@
+% -------------------------------------------------------------------------
+%
 % This function is used to populate the AugMat matrix for RtHS
+%
+% -------------------------------------------------------------------------
 function [u, m] = FillAugMat(p, x, m, u)
     
     %% Initialize the matrix 
@@ -25,7 +29,6 @@ function [u, m] = FillAugMat(p, x, m, u)
         m.AugMat(p.DOFs.PTTE(I), p.NAug)    = dot( m.RtHS.PLinVelEO(1, :, p.DOFs.PTTE(I)), TmpVec1);
     end
     
-
     for J = 2:p.TwrNodes+1
         for L = 1:p.DOFs.NPTTE
             for I = L:p.DOFs.NPTTE
@@ -39,7 +42,7 @@ function [u, m] = FillAugMat(p, x, m, u)
             end
         end % L - All active (enabled) tower DOFs that contribute to the QD2T-related linear accelerations of the tower
 
-        TmpVec1     = [0,0,0].*p.DHNodes(J) ...  % No impact from FTHydrot
+        TmpVec1     = [0,0,0].*p.DHNodes(J) ...  	            % No impact from FTHydrot
                     - p.TElmntMass(J-1)*(p.Gravity*m.CoordSys.z2 + m.RtHS.LinAccETt(:,J)');
         TmpVec3     = [0,0,0].*p.DHNodes(J);                    % No impact from MFHydrot
         for I = 1:p.DOFs.NPTTE

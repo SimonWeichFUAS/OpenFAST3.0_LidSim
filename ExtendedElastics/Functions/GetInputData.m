@@ -1,3 +1,10 @@
+% -------------------------------------------------------------------------
+%
+% This function extract the corresponding input data for the current
+% simulation step and stage of the runge-kutta method from the provided
+% data structs
+%
+% -------------------------------------------------------------------------
 function u = GetInputData(iStep, RK4_stage, u, p)
 
     % Extract relevant data

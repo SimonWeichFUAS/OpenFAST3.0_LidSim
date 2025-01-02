@@ -1,4 +1,9 @@
-function m = CalculatePositions(p, x, m)
+% -------------------------------------------------------------------------
+%
+% This function is used to calculate the positions stored in other states
+%
+% -------------------------------------------------------------------------
+function m = CalculatePositions(p, m)
     
     %% Position vectors between various points on the wind turbine
     m.RtHS.rOU          = p.NacCMxn*m.CoordSys.d1 + p.NacCMzn*m.CoordSys.d2 - p.NacCMyn*m.CoordSys.d3;
@@ -28,4 +33,5 @@ function m = CalculatePositions(p, x, m)
             m.RtHS.rQS(:, J+1, K)         = m.RtHS.rS0S(:, J, K) + p.HubRad*m.CoordSys.j3(K, :)';
         end     % J - Number of blade nodes
     end     % K - Number of blades
+    
 end

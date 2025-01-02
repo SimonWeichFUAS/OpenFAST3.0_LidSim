@@ -1,4 +1,8 @@
+% -------------------------------------------------------------------------
+%
 % This function implements the fourth-order Runge-Kutta Method
+%
+% -------------------------------------------------------------------------
 function [u, x, m] = RK4(iStep, u, p, x, m)
 
     % First stage

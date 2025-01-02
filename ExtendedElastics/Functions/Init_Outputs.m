@@ -1,14 +1,18 @@
+% -------------------------------------------------------------------------
+%
 % This function initializes the structs for saving simulation outputs
-function [m, y] = Init_Outputs(p, x, InputFileData, m)
+%
+% -------------------------------------------------------------------------
+function [m, y] = Init_Outputs(p, x, m)
 
     % Allocate structs
-    m.Results.qt        = AllocStruct(p.NDOF, p.Tend/p.dt + 1);
-    m.Results.qdt       = AllocStruct(p.NDOF, p.Tend/p.dt + 1);
-    m.Results.qd2t      = AllocStruct(p.NDOF, p.Tend/p.dt + 1);
+    m.Results.qt                    = AllocStruct(p.NDOF, p.Tend/p.dt + 1);
+    m.Results.qdt                   = AllocStruct(p.NDOF, p.Tend/p.dt + 1);
+    m.Results.qd2t                  = AllocStruct(p.NDOF, p.Tend/p.dt + 1);
 
-    y.RotSpeed  = AllocStruct(p.Tend/p.dt + 1);
-    y.TTDspFA   = AllocStruct(p.Tend/p.dt + 1);
-    
+    y.RotSpeed                      = AllocStruct(p.Tend/p.dt + 1);
+    y.TTDspFA                       = AllocStruct(p.Tend/p.dt + 1);
+
     % Save initial conditions
     m.Results.qt(p.DOF_TFA1, 1)     = x.qt(p.DOF_TFA1);
     m.Results.qt(p.DOF_GeAz, 1)     = x.qt(p.DOF_GeAz);

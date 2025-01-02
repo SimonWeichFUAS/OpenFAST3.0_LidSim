@@ -1,5 +1,9 @@
+% -------------------------------------------------------------------------
+%
 % Function for the extraction of FAST-binary-outputs and
 % additional/seperate output channels
+%
+% -------------------------------------------------------------------------
 function [  Binaries, ...
             ExtendedInputs, ...
             ExtendedForces, ...

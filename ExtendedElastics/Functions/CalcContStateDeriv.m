@@ -1,13 +1,17 @@
+% -------------------------------------------------------------------------
+%
 % This function computes derivatives of continuous states
+%
+% -------------------------------------------------------------------------
 function [u, xdot, m] = CalcContStateDeriv(iStep, u, p, x, m, RK4_stage)
     
     % Initializtation 
     u                       = GetInputData(iStep, RK4_stage, u, p);
     m                       = SetCoordSy(p, x, m, u);
-    m                       = CalculatePositions(p, x, m);
+    m                       = CalculatePositions(p, m);
     m                       = CalculateAngularPosVelPAcc(p, x, m);
     m                       = CalculateLinearVelPAcc(p, x, m);
-    m                       = CalculateForcesMoments(p, x, m, u);
+    m                       = CalculateForcesMoments(p, m, u);
 
     [u, m]                  = FillAugMat(p, x, m, u);
 

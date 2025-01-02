@@ -1,4 +1,8 @@
+% -------------------------------------------------------------------------
+%
 % This function initializes the continuous states 
+%
+% -------------------------------------------------------------------------
 function x = Init_ContStates(p, InputFileData)
     
     % Allocate structs

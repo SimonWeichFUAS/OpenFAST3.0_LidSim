@@ -1,5 +1,9 @@
+% -------------------------------------------------------------------------
+%
 %  Function for computing the output channels
-function [m, y] = CalcOutputs(u, p, x, m)
+%
+% -------------------------------------------------------------------------
+function [m, y] = CalcOutputs(p, x, m)
     
     m.AllOuts(p.Q_GeAz)       = x.qt(p.DOF_GeAz);
     m.AllOuts(p.Q_TFA1)       = x.qt(p.DOF_TFA1);

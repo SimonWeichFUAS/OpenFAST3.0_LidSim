@@ -1,3 +1,9 @@
+% -------------------------------------------------------------------------
+%
+% This function is used to calculate the angular positions, velocities, 
+% and partial accelerations stored in other states
+%
+% -------------------------------------------------------------------------
 function m = CalculateAngularPosVelPAcc(p, x, m)
     
     m.RtHS.PAngVelEX(1, :, :)           = 0;

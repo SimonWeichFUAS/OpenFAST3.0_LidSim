@@ -1,5 +1,9 @@
+% -------------------------------------------------------------------------
+%
 % This function initializes miscallanious part of the main script
-function m = Init_MiscOtherStates(p, x, InputFileData)
+%
+% -------------------------------------------------------------------------
+function m = Init_MiscOtherStates(p)
     
     % Allocate structs 
     m               = Alloc_RtHS(p);

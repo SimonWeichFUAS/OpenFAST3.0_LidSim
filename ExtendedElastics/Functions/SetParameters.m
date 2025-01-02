@@ -1,4 +1,9 @@
-% This function sets the parameters, based on the data stored in InputFileData
+% -------------------------------------------------------------------------
+%
+% This function sets the parameters, 
+% based on the data stored in InputFileData
+%
+% -------------------------------------------------------------------------
 function p = SetParameters(InputFileData)
    
     %% Set parameters from primary input file
@@ -141,7 +146,6 @@ function p = SetParameters(InputFileData)
     %% Outputs
     p.MaxOutputs    = 8;        % 3 GeAz_q + 1 GeAz_y + 3 TFA1_q + 1 TFA1_y
    
-
     %% Set blade and tower parameters
     p.Hubg1Iner                 = InputFileData.HubIner;    % Note: This only applies for a 3-bladed rotor
     p.Hubg2Iner                 = 0.0;
@@ -217,5 +221,4 @@ function p = SetParameters(InputFileData)
     p.KTFA                      = 2805922.0;
     p.CTFA                      = 3514.083;
     
-
 end

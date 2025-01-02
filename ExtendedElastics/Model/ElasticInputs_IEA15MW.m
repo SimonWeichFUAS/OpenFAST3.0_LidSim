@@ -1,6 +1,10 @@
+% -------------------------------------------------------------------------
+%
 % This function provides the required inputs for running
 % "RunFAST_ExtendedElastics.m" for the IEA15MW turbine
 % Based on "ElastoDyn.dat"
+%
+% -------------------------------------------------------------------------
 function [InputFileData] = ElasticInputs_IEA15MW
 
 %% Simulation Control

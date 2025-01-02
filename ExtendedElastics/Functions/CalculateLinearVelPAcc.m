@@ -1,3 +1,9 @@
+% -------------------------------------------------------------------------
+%
+% This function is used to calculate the linear velocities and 
+% accelerations stored in other states
+%
+% -------------------------------------------------------------------------
 function m = CalculateLinearVelPAcc(p, x, m)
     
     % Initializations

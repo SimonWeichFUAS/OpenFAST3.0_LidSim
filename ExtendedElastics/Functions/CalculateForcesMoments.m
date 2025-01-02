@@ -1,4 +1,10 @@
-function m = CalculateForcesMoments(p, x, m, u)
+% -------------------------------------------------------------------------
+%
+% This function is used to calculate the forces and moments 
+% stored in other states
+%
+% -------------------------------------------------------------------------
+function m = CalculateForcesMoments(p, m, u)
     
     %% Aerodynamic force/moment force per unit span acting on a blade at point S
     for K = 1:p.NumBl
@@ -76,10 +82,8 @@ function m = CalculateForcesMoments(p, x, m, u)
     TmpVec2                     = (cross( m.RtHS.rPC, TmpVec1 ))';
     TmpVec                      = p.Hubg1Iner*m.CoordSys.g1*dot( m.CoordSys.g1, m.RtHS.AngVelEH ) ...
                                 + p.Hubg2Iner*m.CoordSys.g2*dot( m.CoordSys.g2, m.RtHS.AngVelEH );
-    TmpVec3                     = (cross( -m.RtHS.AngVelEH, TmpVec ))';                                 % At this point the result of the cross product deviates from the ElastoDyn result
-                                                                                                        % Could it be possible, that Fortran rounds a number to 0 when displaying it in the cmd window?
-                                                                                                        % In Matlab the third component of "TmpVec3" is =0, but thats not true
-                                                                                                        % It should be comparably small but not =0!!!
+    TmpVec3                     = (cross( -m.RtHS.AngVelEH, TmpVec ))';                                 
+    
     % BeamDyn loads (HubPtLoads) are excluded at this point
     m.RtHS.FrcPRott             = TmpVec1;  
     m.RtHS.MomLPRott            = TmpVec2 + TmpVec3 - (p.Hubg1Iner*m.CoordSys.g1*dot( m.CoordSys.g1, m.RtHS.AngAccEHt ))' ...
