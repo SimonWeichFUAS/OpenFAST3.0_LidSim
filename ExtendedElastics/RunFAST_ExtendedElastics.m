@@ -6,7 +6,7 @@
 % -------------------------------------------------------------------------
 %
 %   [Version]
-%   v4d1  -   Usage of aerodynamic loads as primary inputs      - SW    -   01/15/25
+%   v4d2  -     Implementation of the 1st simplification step      - SW    -   01/15/25
 %
 % -------------------------------------------------------------------------
 %
@@ -137,3 +137,12 @@ if PlotResults
     xlabel('time [s]')
 
 end
+
+%% Calculate MRE of RotSpeed and TTDspFA
+mRelErr_RotSpeed        = mean((RotSpeed_FAST-radPs2rpm(RotSpeed_ExEl))./p.RotSpeed);
+mRelErr_TTDspFA         = mean((TTDspFA_FAST-TTDspFA_ExEl)./p.TTDspFA);
+
+fprintf(['The mean relative error of the rotor speed is: %26.6e\n'],               mRelErr_RotSpeed)
+fprintf(['The mean relative error of the tower-tip displacement is: %15.6e\n'],    mRelErr_TTDspFA)
+
+

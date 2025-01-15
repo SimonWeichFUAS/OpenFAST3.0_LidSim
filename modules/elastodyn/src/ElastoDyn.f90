@@ -9557,6 +9557,7 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
       INTEGER(IntKi)                                :: I                 ! Loops through some or all of the DOFs.
       INTEGER(IntKi)                                :: J                 ! Counter for elements
       INTEGER(IntKi)                                :: K
+      INTEGER(IntKi)                                :: L
       INTEGER(IntKi)                                :: RK4_stage
       INTEGER(IntKi)                                :: iRow
       INTEGER(IntKi)                                :: iCol
@@ -9632,6 +9633,30 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
             ENDDO   ! J - Number of blade nodes/elements
         ENDDO   ! K - Number of blades
         
+        DO L = 1,p%DOFs%NActvDOF
+            DO I = 1,3
+                iCol                        = 902 + I + (L-1)*3
+                dataArray(iRow, iCol)       = m%RtHS%PFrcPRot(I,p%DOFs%SrtPS(L))
+            ENDDO   ! I - Number of vector components
+        ENDDO   ! L - Number of active DOFs
+        
+        DO I = 1,3
+            iCol                            = 908 + I
+            dataArray(iRow, iCol)           = m%RtHS%FrcPRott(I)
+        ENDDO   ! I - Number of vector components
+        
+        DO L = 1,p%DOFs%NActvDOF
+            DO I = 1,3
+                iCol                        = 911 + I + (L-1)*3
+                dataArray(iRow, iCol)       = m%RtHS%PMomLPRot(I,p%DOFs%SrtPS(L))
+            ENDDO   ! I - Number of vector components
+        ENDDO   ! L - Number of active DOFs
+        
+        DO I = 1,3
+            iCol                            = 917 + I
+            dataArray(iRow, iCol)           = m%RtHS%MomLPRott(I)
+        ENDDO   ! I - Number of vector components
+        
       k1%qt  = p%dt * xdot%qt
       k1%qdt = p%dt * xdot%qdt
   
@@ -9676,6 +9701,30 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
             ENDDO   ! J - Number of blade nodes/elements
         ENDDO   ! K - Number of blades
         
+        DO L = 1,p%DOFs%NActvDOF
+            DO I = 1,3
+                iCol                        = 902 + I + (L-1)*3
+                dataArray(iRow, iCol)       = m%RtHS%PFrcPRot(I,p%DOFs%SrtPS(L))
+            ENDDO   ! I - Number of vector components
+        ENDDO   ! L - Number of active DOFs
+        
+        DO I = 1,3
+            iCol                            = 908 + I
+            dataArray(iRow, iCol)           = m%RtHS%FrcPRott(I)
+        ENDDO   ! I - Number of vector components
+        
+        DO L = 1,p%DOFs%NActvDOF
+            DO I = 1,3
+                iCol                        = 911 + I + (L-1)*3
+                dataArray(iRow, iCol)       = m%RtHS%PMomLPRot(I,p%DOFs%SrtPS(L))
+            ENDDO   ! I - Number of vector components
+        ENDDO   ! L - Number of active DOFs
+        
+        DO I = 1,3
+            iCol                            = 917 + I
+            dataArray(iRow, iCol)           = m%RtHS%MomLPRott(I)
+        ENDDO   ! I - Number of vector components
+        
       k2%qt  = p%dt * xdot%qt
       k2%qdt = p%dt * xdot%qdt
 
@@ -9715,6 +9764,30 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
                 ENDDO   ! I - Number of vector components
             ENDDO   ! J - Number of blade nodes/elements
         ENDDO   ! K - Number of blades
+        
+        DO L = 1,p%DOFs%NActvDOF
+            DO I = 1,3
+                iCol                        = 902 + I + (L-1)*3
+                dataArray(iRow, iCol)       = m%RtHS%PFrcPRot(I,p%DOFs%SrtPS(L))
+            ENDDO   ! I - Number of vector components
+        ENDDO   ! L - Number of active DOFs
+        
+        DO I = 1,3
+            iCol                            = 908 + I
+            dataArray(iRow, iCol)           = m%RtHS%FrcPRott(I)
+        ENDDO   ! I - Number of vector components
+        
+        DO L = 1,p%DOFs%NActvDOF
+            DO I = 1,3
+                iCol                        = 911 + I + (L-1)*3
+                dataArray(iRow, iCol)       = m%RtHS%PMomLPRot(I,p%DOFs%SrtPS(L))
+            ENDDO   ! I - Number of vector components
+        ENDDO   ! L - Number of active DOFs
+        
+        DO I = 1,3
+            iCol                            = 917 + I
+            dataArray(iRow, iCol)           = m%RtHS%MomLPRott(I)
+        ENDDO   ! I - Number of vector components
         
       k3%qt  = p%dt * xdot%qt
       k3%qdt = p%dt * xdot%qdt
@@ -9759,6 +9832,30 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
                 ENDDO   ! I - Number of vector components
             ENDDO   ! J - Number of blade nodes/elements
         ENDDO   ! K - Number of blades
+        
+        DO L = 1,p%DOFs%NActvDOF
+            DO I = 1,3
+                iCol                        = 902 + I + (L-1)*3
+                dataArray(iRow, iCol)       = m%RtHS%PFrcPRot(I,p%DOFs%SrtPS(L))
+            ENDDO   ! I - Number of vector components
+        ENDDO   ! L - Number of active DOFs
+        
+        DO I = 1,3
+            iCol                            = 908 + I
+            dataArray(iRow, iCol)           = m%RtHS%FrcPRott(I)
+        ENDDO   ! I - Number of vector components
+        
+        DO L = 1,p%DOFs%NActvDOF
+            DO I = 1,3
+                iCol                        = 911 + I + (L-1)*3
+                dataArray(iRow, iCol)       = m%RtHS%PMomLPRot(I,p%DOFs%SrtPS(L))
+            ENDDO   ! I - Number of vector components
+        ENDDO   ! L - Number of active DOFs
+        
+        DO I = 1,3
+            iCol                            = 917 + I
+            dataArray(iRow, iCol)           = m%RtHS%MomLPRott(I)
+        ENDDO   ! I - Number of vector components
 
       k4%qt  = p%dt * xdot%qt
       k4%qdt = p%dt * xdot%qdt

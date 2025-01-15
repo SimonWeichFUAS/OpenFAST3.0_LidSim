@@ -1,1 +1,1 @@
-#define GIT_VERSION_INFO '3.0-18-g979bec07-dirty' 
+#define GIT_VERSION_INFO '3.0-19-g9c7796e9-dirty' 

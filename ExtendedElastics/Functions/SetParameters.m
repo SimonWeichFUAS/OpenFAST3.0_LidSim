@@ -15,6 +15,7 @@ function p = SetParameters(InputFileData)
 
     p.dt        = InputFileData.dt;
     p.Tend      = InputFileData.Tend;
+    p.SimMode   = InputFileData.SimMode;
     p.Gravity   = InputFileData.Gravity;
     p.OverHang  = InputFileData.OverHang;
     p.ShftGagL  = InputFileData.ShftGagL;

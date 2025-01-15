@@ -21,7 +21,7 @@ MODULE GlobalData
         
         INTEGER							:: cols
 		
-        cols				= 902							! Specific number of columns (Channels); 
+        cols				= 920							! Specific number of columns (Channels); 
 															! Inputs from ServoDyn  + Aerod. forces at every blade node + Aerod. moments at every bladde node
 															! 2						+ 450       						+ 450
         
