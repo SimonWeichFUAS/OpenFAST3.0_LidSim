@@ -15,7 +15,7 @@ function m = CalculateAngularPosVelPAcc(p, x, m)
     m.RtHS.PAngVelEB(2, :, p.DOF_TFA1)  = cross( m.RtHS.AngVelEX, m.RtHS.PAngVelEB(1, :, p.DOF_TFA1) );
 
     m.RtHS.AngVelEB                     = m.RtHS.AngVelEX + x.qdt(p.DOF_TFA1)*m.RtHS.PAngVelEB(1, :, p.DOF_TFA1);      % Note: we only consider TFA1
-    m.RtHS.AngAccEBt                    = m.RtHS.AngAccEXt + x.qdt(p.DOF_TFA1).*m.RtHS.PAngVelEB(1, :, p.DOF_TFA1);
+    m.RtHS.AngAccEBt                    = m.RtHS.AngAccEXt + x.qdt(p.DOF_TFA1).*m.RtHS.PAngVelEB(2, :, p.DOF_TFA1);
 
     m.RtHS.PAngVelEN(1, :, :)           = m.RtHS.PAngVelEB(1, :, :);
     m.RtHS.PAngVelEN(2, :, :)           = m.RtHS.PAngVelEB(2, :, :);

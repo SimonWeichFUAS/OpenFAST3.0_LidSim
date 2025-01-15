@@ -7,8 +7,7 @@ function [u, m] = FillAugMat(p, x, m, u)
     
     %% Initialize the matrix 
     m.AugMat(:, :)  = 0;
-%     GBoxTrq         = u.GenTrq * p.GBRatio;
-    GBoxTrq             = p.GBoxTrqConst;
+    GBoxTrq         = u.GenTrq * p.GBRatio;
     
     %% Blades
     % A loop through blade nodes/elements is not necessary since no 

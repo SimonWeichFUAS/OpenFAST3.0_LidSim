@@ -4,10 +4,8 @@
 % in the ExtendedOutsputs data structure
 %
 % -------------------------------------------------------------------------
-function u = Init_u(ExtendedInputs, ExtendedForces, ExtendedMoments)
+function u  = Init_u(ExtendedOutputs)
     
-    u.RawDataInp    = ExtendedInputs;
-    u.RawDataFrc    = ExtendedForces;
-    u.RawDataMmt    = ExtendedMoments;
+    u.RawDataInp    = ExtendedOutputs;
 
 end
