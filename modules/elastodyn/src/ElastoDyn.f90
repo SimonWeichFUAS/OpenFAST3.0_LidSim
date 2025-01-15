@@ -29,6 +29,8 @@ MODULE ElastoDyn
    USE ED_UserSubs         ! <- module not in the FAST Framework!
 
    USE ElastoDyn_AllBldNdOuts_IO
+   
+   USE GlobalData
 
    IMPLICIT NONE
 
@@ -101,6 +103,7 @@ SUBROUTINE ED_Init( InitInp, u, p, x, xd, z, OtherState, y, m, Interval, InitOut
    LOGICAL, PARAMETER                           :: GetAdamsVals = .FALSE.  ! Determines if we should read Adams values and create (update) an Adams model
    CHARACTER(ErrMsgLen)                         :: ErrMsg2                 ! temporary Error message if ErrStat /= ErrID_None
    REAL(R8Ki)                                   :: TransMat(3,3)            ! Initial rotation matrix at Platform Refz
+   INTEGER                                      :: rows
 
 
       ! Initialize variables for this routine
@@ -186,6 +189,14 @@ SUBROUTINE ED_Init( InitInp, u, p, x, xd, z, OtherState, y, m, Interval, InitOut
       CALL CheckError( ErrStat2, ErrMsg2 )
       IF (ErrStat >= AbortErrLev) RETURN                  
    
+      !............................................................................................
+      ! Define initial global data array for storing additional outputs
+      !............................................................................................
+      rows  = 12000                             ! Total simulation time / simulation step size * number of 
+                                                ! expected comp. steps during one time step
+      
+      CALL Init_GlobalData(rows)
+      
 
       !............................................................................................
       ! Define system output initializations (set up meshes) here:
@@ -376,7 +387,8 @@ SUBROUTINE ED_End( u, p, x, xd, z, OtherState, y, m, ErrStat, ErrMsg )
 
          ! Place any last minute operations or calculations here:
 
-
+      CALL WriteDataArrayToFile('output_data.txt')
+    
          ! Close files here:
 
 
@@ -9545,6 +9557,9 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
       INTEGER(IntKi)                                :: I                 ! Loops through some or all of the DOFs.
       INTEGER(IntKi)                                :: J                 ! Counter for elements
       INTEGER(IntKi)                                :: K
+      INTEGER(IntKi)                                :: RK4_stage
+      INTEGER(IntKi)                                :: iRow
+      INTEGER(IntKi)                                :: iCol
       REAL(DbKi), DIMENSION(:), ALLOCATABLE         :: SolnVecTmp
       REAL(ReKi)                                    :: TmpVec    (3)
       REAL(ReKi)                                    :: TmpVec1   (3)
@@ -9585,27 +9600,37 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          IF ( ErrStat >= AbortErrLev ) RETURN
 !      HSSBrTrq_at_t = u_interp%HSSBrTrqC
 !      OtherState%HSSBrTrqC = SIGN( u_interp%HSSBrTrqC, x%QDT(DOF_GeAz) )         
-!      OtherState%HSSBrTrq  = OtherState%HSSBrTrqC         
-    
-        ! Write certain components of u_interp at t into .txt-files
-        CALL WriteToFileInputs(t, u_interp%BlPitchCom(1), 1)
-         
-        DO K = 1,p%NumBl
-            DO J = 1,p%BldNodes
-                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(1, J), 1)
-                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(2, J), 1)
-                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(3, J), 1)
-                
-                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(1, J), 1)
-                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(2, J), 1)
-                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(3, J), 1)
-            ENDDO   ! J - Number of blade nodes/elements
-        ENDDO   ! K - Number of blades
+!      OtherState%HSSBrTrq  = OtherState%HSSBrTrqC        
          
       ! find xdot at t
       CALL ED_CalcContStateDeriv( t, u_interp, p, x, xd, z, OtherState, m, xdot, ErrStat2, ErrMsg2 )
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
+        
+        ! Store specific values in the "dataArry" at the current time step and stage of RK4
+        RK4_stage               = 1
+        iRow                    = (NINT(t / p%DT) * 4) + RK4_stage
+        
+        dataArray(iRow, 1)      = u_interp%BlPitchCom(1)
+        dataArray(iRow, 2)      = u_interp%GenTrq
+        
+        DO K = 1,p%NumBl
+            DO J = 1,p%BldNodes
+                DO I = 1,3
+                    iCol                    = 2 + I + (J-1)*3 + (K-1)*150
+                    dataArray(iRow, iCol)   = u_interp%BladePtLoads(K)%Force(I, J)
+                ENDDO   ! I - Number of vector components
+            ENDDO   ! J - Number of blade nodes/elements
+        ENDDO   ! K - Number of blades
+        
+        DO K = 1,p%NumBl
+            DO J = 1,p%BldNodes
+                DO I = 1,3
+                    iCol                    = 452 + I + (J-1)*3 + (K-1)*150
+                    dataArray(iRow, iCol)   = u_interp%BladePtLoads(K)%Moment(I, J)
+                ENDDO   ! I - Number of vector components
+            ENDDO   ! J - Number of blade nodes/elements
+        ENDDO   ! K - Number of blades
         
       k1%qt  = p%dt * xdot%qt
       k1%qdt = p%dt * xdot%qdt
@@ -9619,27 +9644,37 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
          IF ( ErrStat >= AbortErrLev ) RETURN
 !      u_interp%HSSBrTrqC = max(0.0_ReKi, min(u_interp%HSSBrTrqC, HSSBrTrq_at_t )) ! hack for extrapolation of limits       
 !      OtherState%HSSBrTrqC = SIGN( u_interp%HSSBrTrqC, x_tmp%QDT(DOF_GeAz) )         
-!      OtherState%HSSBrTrq  = OtherState%HSSBrTrqC   
-         
-        ! Write certain components of u_interp at t+dt/2 into .txt-files
-        CALL WriteToFileInputs(t, u_interp%BlPitchCom(1), 1)
-         
-        DO K = 1,p%NumBl
-            DO J = 1,p%BldNodes
-                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(1, J), 1)
-                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(2, J), 1)
-                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(3, J), 1)
-                
-                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(1, J), 1)
-                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(2, J), 1)
-                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(3, J), 1)
-            ENDDO   ! J - Number of blade nodes/elements
-        ENDDO   ! K - Number of blades
+!      OtherState%HSSBrTrq  = OtherState%HSSBrTrqC  
 
       ! find xdot at t + dt/2
       CALL ED_CalcContStateDeriv( t + 0.5*p%dt, u_interp, p, x_tmp, xd, z, OtherState, m, xdot, ErrStat2, ErrMsg2 )
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
+        
+        ! Store specific values in the "dataArry" at the current time step and stage of RK4
+        RK4_stage               = 2
+        iRow                    = (NINT(t / p%DT) * 4) + RK4_stage
+        
+        dataArray(iRow, 1)      = u_interp%BlPitchCom(1)
+        dataArray(iRow, 2)      = u_interp%GenTrq
+        
+        DO K = 1,p%NumBl
+            DO J = 1,p%BldNodes
+                DO I = 1,3
+                    iCol                    = 2 + I + (J-1)*3 + (K-1)*150
+                    dataArray(iRow, iCol)   = u_interp%BladePtLoads(K)%Force(I, J)
+                ENDDO   ! I - Number of vector components
+            ENDDO   ! J - Number of blade nodes/elements
+        ENDDO   ! K - Number of blades
+        
+        DO K = 1,p%NumBl
+            DO J = 1,p%BldNodes
+                DO I = 1,3
+                    iCol                    = 452 + I + (J-1)*3 + (K-1)*150
+                    dataArray(iRow, iCol)   = u_interp%BladePtLoads(K)%Moment(I, J)
+                ENDDO   ! I - Number of vector components
+            ENDDO   ! J - Number of blade nodes/elements
+        ENDDO   ! K - Number of blades
         
       k2%qt  = p%dt * xdot%qt
       k2%qdt = p%dt * xdot%qdt
@@ -9650,26 +9685,36 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
       ! find xdot at t + dt/2
 !      u_interp%HSSBrTrqC = max(0.0_ReKi, min(u_interp%HSSBrTrqC, HSSBrTrq_at_t )) ! hack for extrapolation of limits       
 !      OtherState%HSSBrTrqC = SIGN( u_interp%HSSBrTrqC, x_tmp%QDT(DOF_GeAz) )         
-!      OtherState%HSSBrTrq  = OtherState%HSSBrTrqC  
-      
-        ! Write certain components of u_interp at t+dt/2 into .txt-files
-        CALL WriteToFileInputs(t, u_interp%BlPitchCom(1), 1)
-         
-        DO K = 1,p%NumBl
-            DO J = 1,p%BldNodes
-                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(1, J), 1)
-                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(2, J), 1)
-                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(3, J), 1)
-                
-                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(1, J), 1)
-                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(2, J), 1)
-                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(3, J), 1)
-            ENDDO   ! J - Number of blade nodes/elements
-        ENDDO   ! K - Number of blades
+!      OtherState%HSSBrTrq  = OtherState%HSSBrTrqC
         
       CALL ED_CalcContStateDeriv( t + 0.5*p%dt, u_interp, p, x_tmp, xd, z, OtherState, m, xdot, ErrStat2, ErrMsg2 )
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
+        
+        ! Store specific values in the "dataArry" at the current time step and stage of RK4
+        RK4_stage               = 3
+        iRow                    = (NINT(t / p%DT) * 4) + RK4_stage
+        
+        dataArray(iRow, 1)      = u_interp%BlPitchCom(1)
+        dataArray(iRow, 2)      = u_interp%GenTrq
+        
+        DO K = 1,p%NumBl
+            DO J = 1,p%BldNodes
+                DO I = 1,3
+                    iCol                    = 2 + I + (J-1)*3 + (K-1)*150
+                    dataArray(iRow, iCol)   = u_interp%BladePtLoads(K)%Force(I, J)
+                ENDDO   ! I - Number of vector components
+            ENDDO   ! J - Number of blade nodes/elements
+        ENDDO   ! K - Number of blades
+        
+        DO K = 1,p%NumBl
+            DO J = 1,p%BldNodes
+                DO I = 1,3
+                    iCol                    = 452 + I + (J-1)*3 + (K-1)*150
+                    dataArray(iRow, iCol)   = u_interp%BladePtLoads(K)%Moment(I, J)
+                ENDDO   ! I - Number of vector components
+            ENDDO   ! J - Number of blade nodes/elements
+        ENDDO   ! K - Number of blades
         
       k3%qt  = p%dt * xdot%qt
       k3%qdt = p%dt * xdot%qdt
@@ -9684,26 +9729,36 @@ SUBROUTINE ED_RK4( t, n, u, utimes, p, x, xd, z, OtherState, m, ErrStat, ErrMsg 
 !      u_interp%HSSBrTrqC = max(0.0_ReKi, min(u_interp%HSSBrTrqC, HSSBrTrq_at_t )) ! hack for extrapolation of limits       
 !      OtherState%HSSBrTrqC = SIGN( u_interp%HSSBrTrqC, x_tmp%QDT(DOF_GeAz) )         
 !      OtherState%HSSBrTrq  = OtherState%HSSBrTrqC  
-         
-        ! Write certain components of u_interp at t+dt into .txt-files
-        CALL WriteToFileInputs(t, u_interp%BlPitchCom(1), 1)
-         
-        DO K = 1,p%NumBl
-            DO J = 1,p%BldNodes
-                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(1, J), 1)
-                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(2, J), 1)
-                CALL WriteToFileForces(t, u_interp%BladePtLoads(K)%Force(3, J), 1)
-                
-                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(1, J), 1)
-                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(2, J), 1)
-                CALL WriteToFileMoments(t, u_interp%BladePtLoads(K)%Moment(3, J), 1)
-            ENDDO   ! J - Number of blade nodes/elements
-        ENDDO   ! K - Number of blades
 
       ! find xdot at t + dt
       CALL ED_CalcContStateDeriv( t + p%dt, u_interp, p, x_tmp, xd, z, OtherState, m, xdot, ErrStat2, ErrMsg2 )
          CALL CheckError(ErrStat2,ErrMsg2)
          IF ( ErrStat >= AbortErrLev ) RETURN
+       
+        ! Store specific values in the "dataArry" at the current time step and stage of RK4
+        RK4_stage               = 4
+        iRow                    = (NINT(t / p%DT) * 4) + RK4_stage
+        
+        dataArray(iRow, 1)      = u_interp%BlPitchCom(1)
+        dataArray(iRow, 2)      = u_interp%GenTrq
+        
+        DO K = 1,p%NumBl
+            DO J = 1,p%BldNodes
+                DO I = 1,3
+                    iCol                    = 2 + I + (J-1)*3 + (K-1)*150
+                    dataArray(iRow, iCol)   = u_interp%BladePtLoads(K)%Force(I, J)
+                ENDDO   ! I - Number of vector components
+            ENDDO   ! J - Number of blade nodes/elements
+        ENDDO   ! K - Number of blades
+        
+        DO K = 1,p%NumBl
+            DO J = 1,p%BldNodes
+                DO I = 1,3
+                    iCol                    = 452 + I + (J-1)*3 + (K-1)*150
+                    dataArray(iRow, iCol)   = u_interp%BladePtLoads(K)%Moment(I, J)
+                ENDDO   ! I - Number of vector components
+            ENDDO   ! J - Number of blade nodes/elements
+        ENDDO   ! K - Number of blades
 
       k4%qt  = p%dt * xdot%qt
       k4%qdt = p%dt * xdot%qdt
@@ -11926,214 +11981,37 @@ SUBROUTINE ED_GetOP( t, u, p, x, xd, z, OtherState, y, m, ErrStat, ErrMsg, u_op,
 
 END SUBROUTINE ED_GetOP
 !----------------------------------------------------------------------------------------------------------------------------------
-!> Routine to write specific types of data into a .txt-file
-SUBROUTINE WriteToFile(Param1, Param2, TypeSwitch)
+!> Routine to write the complete dataArray into a .txt-file
+SUBROUTINE WriteDataArrayToFile(filename)
 
     IMPLICIT NONE
-    CHARACTER(200) :: filename                  ! name of the .txt file
-    REAL(DbKi),    INTENT(IN) :: Param1         ! first parameter
-    CLASS(*),      INTENT(IN) :: Param2         ! generic type for second parameter
-    INTEGER,       INTENT(IN) :: TypeSwitch     ! swicht for selecting the type of the second parameter
-    INTEGER :: unit, ios, I                     ! file-handle and error status
+    CHARACTER(LEN=*), INTENT(IN)        :: filename 
+    INTEGER                             :: i, j
+    INTEGER                             :: numRows
+    INTEGER                             :: numCols
+    INTEGER                             :: unit, ios
     
-    REAL(ReKi) :: Param2_ReKi                     ! local variable with single precision
-    REAL(R8Ki) :: Param2_R8Ki                     ! local variable with double precision
-    
-    filename = 'ElastoDyn_Extended_Outputs.txt'
     unit = 10
+    OPEN(UNIT=unit, FILE=fileName, STATUS='replace', ACTION='write', IOSTAT=ios)
     
-    ! create/open file
-    OPEN(UNIT=unit, FILE=filename, STATUS='UNKNOWN', ACTION='WRITE', POSITION='APPEND', IOSTAT=ios)
-    
-    ! check for errors
     IF (ios /= 0) THEN
       PRINT *, "Error while opening the file:", filename
       RETURN
     END IF
     
-    ! write contents into file
-    SELECT CASE (TypeSwitch)
-    CASE (1)  ! type ReKi 
-        SELECT TYPE (Param2)
-        TYPE IS (REAL(ReKi))
-            Param2_ReKi = Param2
-            WRITE(unit, '(F8.4, ";", F30.16)') Param1, Param2_ReKi
-        CLASS DEFAULT
-            PRINT *, "Error: Param2 does not match expected type REAL(ReKi)."
-        END SELECT
-    CASE (2)  ! type DbKi 
-        SELECT TYPE (Param2)
-        TYPE IS (REAL(R8Ki))
-            Param2_R8Ki = Param2
-            WRITE(unit, '(F8.4, ";", F30.16)') Param1, Param2_R8Ki
-        CLASS DEFAULT
-            PRINT *, "Error: Param2 does not match expected type REAL(R8Ki)."
-        END SELECT
-    CASE DEFAULT
-        PRINT *, "Error: Invalid TypeSwitch value."
-    END SELECT
+    numRows     = SIZE(dataArray, 1)
+    numCols     = SIZE(dataArray, 2)
     
-    ! close file
+    DO i = 1, numRows
+        DO j = 1, numCols
+            WRITE(unit, '(F32.16, ";")', advance="no") dataArray(i, j)
+        END DO
+        WRITE(unit, *)
+    END DO
+    
     CLOSE(unit)
     
-END SUBROUTINE WriteToFile
-!----------------------------------------------------------------------------------------------------------------------------------
-!> Routine to write specific types of data into a .txt-file
-SUBROUTINE WriteToFileInputs(Param1, Param2, TypeSwitch)
-
-    IMPLICIT NONE
-    CHARACTER(200) :: filename                  ! name of the .txt file
-    REAL(DbKi),    INTENT(IN) :: Param1         ! first parameter
-    CLASS(*),      INTENT(IN) :: Param2         ! generic type for second parameter
-    INTEGER,       INTENT(IN) :: TypeSwitch     ! swicht for selecting the type of the second parameter
-    INTEGER :: unit, ios, I                     ! file-handle and error status
-    
-    REAL(ReKi) :: Param2_ReKi                     ! local variable with single precision
-    REAL(R8Ki) :: Param2_R8Ki                     ! local variable with double precision
-    
-    filename = 'ElastoDyn_Extended_Inputs.txt'
-    unit = 11
-    
-    ! create/open file
-    OPEN(UNIT=unit, FILE=filename, STATUS='UNKNOWN', ACTION='WRITE', POSITION='APPEND', IOSTAT=ios)
-    
-    ! check for errors
-    IF (ios /= 0) THEN
-      PRINT *, "Error while opening the file:", filename
-      RETURN
-    END IF
-    
-    ! write contents into file
-    SELECT CASE (TypeSwitch)
-    CASE (1)  ! type ReKi 
-        SELECT TYPE (Param2)
-        TYPE IS (REAL(ReKi))
-            Param2_ReKi = Param2
-            WRITE(unit, '(F8.4, ";", F30.16)') Param1, Param2_ReKi
-        CLASS DEFAULT
-            PRINT *, "Error: Param2 does not match expected type REAL(ReKi)."
-        END SELECT
-    CASE (2)  ! type DbKi 
-        SELECT TYPE (Param2)
-        TYPE IS (REAL(R8Ki))
-            Param2_R8Ki = Param2
-            WRITE(unit, '(F8.4, ";", F30.16)') Param1, Param2_R8Ki
-        CLASS DEFAULT
-            PRINT *, "Error: Param2 does not match expected type REAL(R8Ki)."
-        END SELECT
-    CASE DEFAULT
-        PRINT *, "Error: Invalid TypeSwitch value."
-    END SELECT
-    
-    ! close file
-    CLOSE(unit)
-    
-END SUBROUTINE WriteToFileInputs
-!----------------------------------------------------------------------------------------------------------------------------------
-!> Routine to write specific types of data into a .txt-file
-SUBROUTINE WriteToFileForces(Param1, Param2, TypeSwitch)
-
-    IMPLICIT NONE
-    CHARACTER(200) :: filename                  ! name of the .txt file
-    REAL(DbKi),    INTENT(IN) :: Param1         ! first parameter
-    CLASS(*),      INTENT(IN) :: Param2         ! generic type for second parameter
-    INTEGER,       INTENT(IN) :: TypeSwitch     ! swicht for selecting the type of the second parameter
-    INTEGER :: unit, ios, I                     ! file-handle and error status
-    
-    REAL(ReKi) :: Param2_ReKi                     ! local variable with single precision
-    REAL(R8Ki) :: Param2_R8Ki                     ! local variable with double precision
-    
-    filename = 'ElastoDyn_Extended_Forces.txt'
-    unit = 12
-    
-    ! create/open file
-    OPEN(UNIT=unit, FILE=filename, STATUS='UNKNOWN', ACTION='WRITE', POSITION='APPEND', IOSTAT=ios)
-    
-    ! check for errors
-    IF (ios /= 0) THEN
-      PRINT *, "Error while opening the file:", filename
-      RETURN
-    END IF
-    
-    ! write contents into file
-    SELECT CASE (TypeSwitch)
-    CASE (1)  ! type ReKi 
-        SELECT TYPE (Param2)
-        TYPE IS (REAL(ReKi))
-            Param2_ReKi = Param2
-            WRITE(unit, '(F8.4, ";", F30.16)') Param1, Param2_ReKi
-        CLASS DEFAULT
-            PRINT *, "Error: Param2 does not match expected type REAL(ReKi)."
-        END SELECT
-    CASE (2)  ! type DbKi 
-        SELECT TYPE (Param2)
-        TYPE IS (REAL(R8Ki))
-            Param2_R8Ki = Param2
-            WRITE(unit, '(F8.4, ";", F30.16)') Param1, Param2_R8Ki
-        CLASS DEFAULT
-            PRINT *, "Error: Param2 does not match expected type REAL(R8Ki)."
-        END SELECT
-    CASE DEFAULT
-        PRINT *, "Error: Invalid TypeSwitch value."
-    END SELECT
-    
-    ! close file
-    CLOSE(unit)
-    
-END SUBROUTINE WriteToFileForces
-!----------------------------------------------------------------------------------------------------------------------------------
-!> Routine to write specific types of data into a .txt-file
-SUBROUTINE WriteToFileMoments(Param1, Param2, TypeSwitch)
-
-    IMPLICIT NONE
-    CHARACTER(200) :: filename                  ! name of the .txt file
-    REAL(DbKi),    INTENT(IN) :: Param1         ! first parameter
-    CLASS(*),      INTENT(IN) :: Param2         ! generic type for second parameter
-    INTEGER,       INTENT(IN) :: TypeSwitch     ! swicht for selecting the type of the second parameter
-    INTEGER :: unit, ios, I                     ! file-handle and error status
-    
-    REAL(ReKi) :: Param2_ReKi                     ! local variable with single precision
-    REAL(R8Ki) :: Param2_R8Ki                     ! local variable with double precision
-    
-    filename = 'ElastoDyn_Extended_Moments.txt'
-    unit = 13
-    
-    ! create/open file
-    OPEN(UNIT=unit, FILE=filename, STATUS='UNKNOWN', ACTION='WRITE', POSITION='APPEND', IOSTAT=ios)
-    
-    ! check for errors
-    IF (ios /= 0) THEN
-      PRINT *, "Error while opening the file:", filename
-      RETURN
-    END IF
-    
-    ! write contents into file
-    SELECT CASE (TypeSwitch)
-    CASE (1)  ! type ReKi 
-        SELECT TYPE (Param2)
-        TYPE IS (REAL(ReKi))
-            Param2_ReKi = Param2
-            WRITE(unit, '(F8.4, ";", F30.16)') Param1, Param2_ReKi
-        CLASS DEFAULT
-            PRINT *, "Error: Param2 does not match expected type REAL(ReKi)."
-        END SELECT
-    CASE (2)  ! type DbKi 
-        SELECT TYPE (Param2)
-        TYPE IS (REAL(R8Ki))
-            Param2_R8Ki = Param2
-            WRITE(unit, '(F8.4, ";", F30.16)') Param1, Param2_R8Ki
-        CLASS DEFAULT
-            PRINT *, "Error: Param2 does not match expected type REAL(R8Ki)."
-        END SELECT
-    CASE DEFAULT
-        PRINT *, "Error: Invalid TypeSwitch value."
-    END SELECT
-    
-    ! close file
-    CLOSE(unit)
-    
-END SUBROUTINE WriteToFileMoments
-
+    END SUBROUTINE WriteDataArrayToFile
 !----------------------------------------------------------------------------------------------------------------------------------
 
 END MODULE ElastoDyn
