@@ -20,6 +20,14 @@
 %               require a solver for a linear system anymore. An
 %               elementwise division leads to the same results.
 %
+%       - v3:   This mode is not considered as a simplification but its
+%               functionality is essential for future simplifications.
+%               Here, the only input parameter for the simulation are the
+%               three forces and momentes acting on the rotor hub. In order
+%               to reduce the number of inputs compared to previous modes,
+%               the computation of partial loads has been re-integrated
+%               into the framework.
+%                               
 % -------------------------------------------------------------------------
 function [u, xdot, m] = CalcContStateDeriv(iStep, u, p, x, m, RK4_stage)
     
@@ -80,6 +88,28 @@ function [u, xdot, m] = CalcContStateDeriv(iStep, u, p, x, m, RK4_stage)
             m.SolnVec                   = m.AugMat( p.DOFs.SrtPS(1:p.DOFs.NActvDOF), p.DOFs.SrtPSNAUG(1+p.DOFs.NActvDOF));
 
             m.SolnVec                   = m.SolnVec ./ m.AugMat_factor;
+
+        case 'v3'
+            % Initializtation
+            u                           = GetInputData_v2(iStep, RK4_stage, u, p);
+            m                           = SetCoordSy(p, x, m, u);
+            m                           = CalculatePositions(p, m);
+            m                           = CalculateAngularPosVelPAcc(p, x, m);
+            m                           = CalculateLinearVelPAcc(p, x, m);
+            m                           = CalculateForcesMoments_v2(p, m, u);
+
+            % Population of the augmented matrix
+            [u, m]                      = FillAugMat_v2(p, x, m, u);
+            
+            % Computaion of the approximated accelerations
+            for I = 1:p.DOFs.NActvDOF
+                m.AugMat_factor(I, 1)   = m.AugMat( p.DOFs.SrtPS(I), p.DOFs.SrtPSNAUG(I));
+            end
+
+            m.SolnVec                   = m.AugMat( p.DOFs.SrtPS(1:p.DOFs.NActvDOF), p.DOFs.SrtPSNAUG(1+p.DOFs.NActvDOF));
+
+            m.SolnVec                   = m.SolnVec ./ m.AugMat_factor;
+
     end
 
     xdot.qt(p.DOF_TFA1, 1)  = x.qdt(p.DOF_TFA1);
