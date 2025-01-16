@@ -6,7 +6,8 @@
 % -------------------------------------------------------------------------
 %
 %   [Version]
-%   v4d2  -     Implementation of the 1st simplification step      - SW    -   01/15/25
+%   v4d2  -     Simplification of the augmented (mass) matrix   - SW    
+%                                                               - 01/15/25
 %
 % -------------------------------------------------------------------------
 %
@@ -143,6 +144,6 @@ mRelErr_RotSpeed        = mean((RotSpeed_FAST-radPs2rpm(RotSpeed_ExEl))./p.RotSp
 mRelErr_TTDspFA         = mean((TTDspFA_FAST-TTDspFA_ExEl)./p.TTDspFA);
 
 fprintf(['The mean relative error of the rotor speed is: %26.6e\n'],               mRelErr_RotSpeed)
-fprintf(['The mean relative error of the tower-tip displacement is: %15.6e\n'],    mRelErr_TTDspFA)
+fprintf(['The mean relative error of the tower-top displacement is: %15.6e\n'],    mRelErr_TTDspFA)
 
 
