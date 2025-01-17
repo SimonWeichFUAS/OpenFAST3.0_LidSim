@@ -123,7 +123,7 @@ function [u, xdot, m] = CalcContStateDeriv(iStep, u, p, x, m, RK4_stage)
             [M, F] = FillAugMat_v3(p, x, m, u);
             
             % Computaion of the approximated accelerations
-            m.SolnVec                   = F ./ diag(M);
+            m.SolnVec                   = F./M;
             
 
     end

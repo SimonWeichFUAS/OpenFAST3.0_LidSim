@@ -26,6 +26,8 @@
 
 clearvars; close all; clc
 
+% global F21 F22 F23 M21 M22
+
 addpath(genpath('Model'))
 addpath(genpath('Functions'))
 addpath(genpath('..\..\WetiMatlabFunctions'))
