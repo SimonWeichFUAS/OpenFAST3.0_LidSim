@@ -110,6 +110,22 @@ function [u, xdot, m] = CalcContStateDeriv(iStep, u, p, x, m, RK4_stage)
 
             m.SolnVec                   = m.SolnVec ./ m.AugMat_factor;
 
+        case 'v4'
+            % Initializtation
+            u                           = GetInputData_v1(iStep, RK4_stage, u, p);
+            m                           = SetCoordSy(p, x, m, u);
+            m                           = CalculatePositions(p, m);
+            m                           = CalculateAngularPosVelPAcc(p, x, m);
+            m                           = CalculateLinearVelPAcc(p, x, m);
+            m                           = CalculateForcesMoments_v1(p, m, u);
+
+            % Population of the augmented matrix
+            [M, F] = FillAugMat_v3(p, x, m, u);
+            
+            % Computaion of the approximated accelerations
+            m.SolnVec                   = F ./ diag(M);
+            
+
     end
 
     xdot.qt(p.DOF_TFA1, 1)  = x.qdt(p.DOF_TFA1);

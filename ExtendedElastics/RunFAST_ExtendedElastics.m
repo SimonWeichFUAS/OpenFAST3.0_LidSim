@@ -86,7 +86,8 @@ fprintf(['Simulation started on %02d-%s-%04d' ...
             cdt(3),datestr(cdt,'mmm'),cdt(1),cdt(4),cdt(5),round(cdt(6)))
 tStartTimer                 = tic;
 
-for iStep = 1:p.Tend/p.dt
+n_t = p.Tend/p.dt;
+for iStep = 1:n_t
     
     [u, x, m]   = UpdateStates(iStep, u, p, x, m);
     m           = CalcOutputs(p, x, m);
@@ -102,10 +103,10 @@ fprintf(['Simulation finished after %2.2f seconds!\n'], tEndTimer)
 if PlotResults
     
     % Allocate channels
-    Time            = Binaries.Time;
-    RotSpeed_FAST   = Binaries.RotSpeed;
+    Time            = Binaries.Time(1:n_t+1);
+    RotSpeed_FAST   = Binaries.RotSpeed(1:n_t+1);
     RotSpeed_ExEl   = y.RotSpeed;
-    TTDspFA_FAST    = Binaries.TTDspFA;
+    TTDspFA_FAST    = Binaries.TTDspFA(1:n_t+1);
     TTDspFA_ExEl    = y.TTDspFA;
     
     % Display ExElvsFAST comparison
