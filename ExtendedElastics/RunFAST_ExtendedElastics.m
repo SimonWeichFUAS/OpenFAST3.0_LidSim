@@ -27,6 +27,7 @@
 clearvars; close all; clc
 
 % global F21 F22 F23 M21 M22
+% global F11 F12 F13 F14 F15 M11 M12 M13 M14
 
 addpath(genpath('Model'))
 addpath(genpath('Functions'))

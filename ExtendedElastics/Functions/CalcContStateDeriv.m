@@ -120,7 +120,7 @@ function [u, xdot, m] = CalcContStateDeriv(iStep, u, p, x, m, RK4_stage)
             m                           = CalculateForcesMoments_v1(p, m, u);
 
             % Population of the augmented matrix
-            [M, F] = FillAugMat_v3(p, x, m, u);
+            [M, F]                      = FillAugMat_v3(p, x, m, u);
             
             % Computaion of the approximated accelerations
             m.SolnVec                   = F./M;
