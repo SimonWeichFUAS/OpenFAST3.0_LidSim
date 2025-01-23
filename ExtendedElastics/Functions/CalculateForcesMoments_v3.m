@@ -5,21 +5,21 @@
 %
 % -------------------------------------------------------------------------
 %
-% Inputs - Misc.:       m.CoordSys.c1       -
-%                       m.CoordSys.d2       - 
-%                       m.CoordSys.z2       -       
-%                       m.RtHS.rOU          -  
-%                       m.RtHS.rVP          -
-%                       m.RtHS.AngVelEG     -
-%       	            m.RtHS.AngAccEGt    -
-%                       m.RtHS.AngAccENt    - 
-%                       m.RtHS.LinAccEUt    -                       
+% Inputs - Misc.:       m.CoordSys.c1       - req. 
+%                       m.CoordSys.d2       - not req. after simplifications
+%                       m.CoordSys.z2       - not req. after simplifications      
+%                       m.RtHS.rOU          - not req. after simplifications 
+%                       m.RtHS.rVP          - req.
+%                       m.RtHS.AngVelEG     - req.
+%       	            m.RtHS.AngAccEGt    - not req. after simplifications
+%                       m.RtHS.AngAccENt    - not req. after simplifications
+%                       m.RtHS.LinAccEUt    - not req. after simplifications                      
 %
 % -------------------------------------------------------------------------
 %
-% Outputs:              m.RtHS.MomLPRott    -
-%                       m.RtHS.FrcONcRtt    -
-%                       m.RtHS.MomBNcRtt    - 
+% Outputs:              m.RtHS.MomLPRott    - req.      
+%                       m.RtHS.FrcONcRtt    - req.
+%                       m.RtHS.MomBNcRtt    - req.
 %
 % -------------------------------------------------------------------------
 function m = CalculateForcesMoments_v3(p, m, u)
@@ -50,14 +50,14 @@ function m = CalculateForcesMoments_v3(p, m, u)
 %                                                     - (p.GenIner*m.CoordSys.c1*dot( m.CoordSys.c1, m.RtHS.PAngVelEG(1, :, p.DOF_GeAz) ))';
 %     end
     
-    %% Forces/Moments at at the nacelle (N) due to the furling structure
+    %% Forces/Moments at at the nacelle (N) due to the furling structure - original
     % Influences of the furling structure are neglected
-    TmpVec3                     = cross( m.RtHS.rVP, m.RtHS.FrcPRott );
-    TmpVec                      = p.GenIner*m.CoordSys.c1*dot( m.CoordSys.c1, m.RtHS.AngVelEG );
-    TmpVec5                     = cross ( -m.RtHS.AngVelEG, TmpVec );
-
-    m.RtHS.FrcVGnRtt            = m.RtHS.FrcPRott;
-    m.RtHS.MomNGnRtt            = m.RtHS.MomLPRott + TmpVec3' + TmpVec5' - (p.GenIner.*m.CoordSys.c1*dot( m.CoordSys.c1, m.RtHS.AngAccEGt ))';
+%     TmpVec3                     = cross( m.RtHS.rVP, m.RtHS.FrcPRott );
+%     TmpVec                      = p.GenIner*m.CoordSys.c1*dot( m.CoordSys.c1, m.RtHS.AngVelEG );
+%     TmpVec5                     = cross( -m.RtHS.AngVelEG, TmpVec );
+% 
+%     m.RtHS.FrcVGnRtt            = m.RtHS.FrcPRott;
+%     m.RtHS.MomNGnRtt            = m.RtHS.MomLPRott + TmpVec3' + TmpVec5' - (p.GenIner.*m.CoordSys.c1*dot( m.CoordSys.c1, m.RtHS.AngAccEGt ))';
 
     %% (Partial) Froces/Moments at the base plate (B) / yaw bearing (O) due to nacelle, generator, and rotor
 %     m.RtHS.PFrcONcRt            = m.RtHS.PFrcVGnRt;
@@ -71,11 +71,35 @@ function m = CalculateForcesMoments_v3(p, m, u)
 %                                                 + (TmpVec2 - p.Nacd2Iner*m.CoordSys.d2*dot( m.CoordSys.d2, m.RtHS.PAngVelEN(1, :, p.DOFs.PUE(I)) ))';
 %     end     % I - Active DOFs that contribute to the linear accelerations of the nacelle CoM
 
-    %% Forces/Moments at the yaw bearing (O)
-    TmpVec1                     = (-p.NacMass*( p.Gravity*m.CoordSys.z2 + m.RtHS.LinAccEUt ))';
-    TmpVec2                     = (cross( m.RtHS.rOU, TmpVec1 ))';
-    m.RtHS.FrcONcRtt            = m.RtHS.FrcVGnRtt + TmpVec1;
-    m.RtHS.MomBNcRtt            = m.RtHS.MomNGnRtt + TmpVec2 ...
-                                    - (p.Nacd2Iner*m.CoordSys.d2*dot( m.CoordSys.d2, m.RtHS.AngAccENt ))';
+    %% Forces/Moments at the yaw bearing (O) - original
+%     TmpVec1                     = (-p.NacMass*( p.Gravity*m.CoordSys.z2 + m.RtHS.LinAccEUt ))'; 
+%     TmpVec2                     = (cross( m.RtHS.rOU, TmpVec1 ))';
+%     m.RtHS.FrcONcRtt            = m.RtHS.FrcVGnRtt + TmpVec1;
+%     m.RtHS.MomBNcRtt            = m.RtHS.MomNGnRtt + TmpVec2 ...
+%                                     - (p.Nacd2Iner*m.CoordSys.d2*dot( m.CoordSys.d2, m.RtHS.AngAccENt ))';
 
+    %% Check 
+%     global CFM1 CFM2 CFM3 CFM4 CFM5 CFM6 CFM7
+%         CFM1    = [CFM1, (p.Nacd2Iner*m.CoordSys.d2*dot( m.CoordSys.d2, m.RtHS.AngAccENt ))' ];                 % 1st: 0; 2nd: 0; 3rd: 0             
+%         CFM2    = [CFM2, (cross( m.RtHS.rOU, TmpVec1 ))'];                                                      % 1st: 0; 2nd: 0; 3rd: mean=2.9829e+07 (could work!)
+%         CFM3    = [CFM3, (-p.NacMass*( p.Gravity*m.CoordSys.z2 + m.RtHS.LinAccEUt ))' ];                        % 1st: mean=-3.2120e+01 (try =0); 2nd: mean=-6.3439e+06 (could work!); 3rd: 0
+%         CFM4    = [CFM4, (p.GenIner.*m.CoordSys.c1*dot( m.CoordSys.c1, m.RtHS.AngAccEGt ))' ];                  % 1st: ~0; 2nd: ~0; 3rd: 0
+%         CFM5    = [CFM5, cross( -m.RtHS.AngVelEG, TmpVec )' ];                                                  % required!
+%         CFM6    = [CFM6, (p.GenIner*m.CoordSys.c1*dot( m.CoordSys.c1, m.RtHS.AngVelEG ))' ];                    % required!
+%         CFM7    = [CFM7, cross( m.RtHS.rVP, m.RtHS.FrcPRott )' ];                                               % required!
+   
+    %% Forces/Moments at at the nacelle (N) due to the furling structure - simplified 
+    % Influences of the furling structure are neglected
+    TmpVec3                     = cross( m.RtHS.rVP, m.RtHS.FrcPRott );
+    TmpVec                      = p.GenIner*m.CoordSys.c1*dot( m.CoordSys.c1, m.RtHS.AngVelEG );
+    TmpVec5                     = cross( -m.RtHS.AngVelEG, TmpVec );
+
+    m.RtHS.FrcVGnRtt            = m.RtHS.FrcPRott;
+    m.RtHS.MomNGnRtt            = m.RtHS.MomLPRott + TmpVec3' + TmpVec5';
+
+    %% Forces/Moments at the yaw bearing (O) - simplified
+    TmpVec1                     = [0;   -6.3439e+06;    0]; 
+    TmpVec2                     = [0;   0;              2.9829e+07];
+    m.RtHS.FrcONcRtt            = m.RtHS.FrcVGnRtt + TmpVec1;
+    m.RtHS.MomBNcRtt            = m.RtHS.MomNGnRtt + TmpVec2;
 end

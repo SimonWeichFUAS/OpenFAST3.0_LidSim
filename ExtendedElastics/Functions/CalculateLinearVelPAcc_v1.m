@@ -7,14 +7,14 @@
 %
 % Inputs - Misc.:       m.CoordSys.a1       -
 %                       m.CoordSys.a2       -
-%                       m.RtHS.rOU          -
-%                       m.RtHS.PAngVelEN    -     
-%                       m.RtHS.AngVelEN     - 
+%                       m.RtHS.rOU          - not req. after simplifications
+%                       m.RtHS.PAngVelEN    - not req. after simplifications
+%                       m.RtHS.AngVelEN     - not req. after simplifications
 %
 % -------------------------------------------------------------------------
 %
-% Outputs:              m.RtHS.PLinVelEO    -
-%                       m.RtHS.LinAccEUt    -                       
+% Outputs:              m.RtHS.PLinVelEO    - req.
+%                       m.RtHS.LinAccEUt    - not req. after simplifications                    
 %
 % -------------------------------------------------------------------------
 function m = CalculateLinearVelPAcc_v1(p, x, m)
@@ -24,28 +24,28 @@ function m = CalculateLinearVelPAcc_v1(p, x, m)
 %     m.RtHS.LinAccEOt(:,:)   = 0.0;
 %     m.RtHS.LinAccESt(:,:,:) = 0.0;
 %     m.RtHS.LinAccETt(:,:)   = 0.0;
-    m.RtHS.LinAccEUt(:,:)   = 0.0;
+%     m.RtHS.LinAccEUt(:,:)   = 0.0;
 
-    EwNXrOU                 = cross( m.RtHS.AngVelEN, m.RtHS.rOU );
+%     EwNXrOU                 = cross( m.RtHS.AngVelEN, m.RtHS.rOU );
 %     EwHXrQC                 = cross( m.RtHS.AngVelEH, m.RtHS.rQC );
     
-    %% (Partial) Linear velocity of the base plate (point O) in the inertia frame (body E - earth) + 1st time derivative
-    m.RtHS.PLinVelEO(:,:,:)             = 0;        % Reasonable, since RtHSdat%PLinVelEZ(:,:,:) = 0 for this 2DOF-case
-    m.RtHS.PLinVelEO(1, :, p.DOF_TFA1)  = m.CoordSys.a1 - ( p.AxRedTFA(1,1,p.TTopNode)*x.qt(p.DOF_TFA1) ).*m.CoordSys.a2;
-    m.RtHS.PLinVelEO(2, :, p.DOF_TFA1)  = [0,0,0] - ( p.AxRedTFA(1,1,p.TTopNode)*x.qdt(p.DOF_TFA1) ).*m.CoordSys.a2;
+    %% (Partial) Linear velocity of the base plate (point O) in the inertia frame (body E - earth) + 1st time derivative - original
+%     m.RtHS.PLinVelEO(:,:,:)             = 0;        % Reasonable, since RtHSdat%PLinVelEZ(:,:,:) = 0 for this 2DOF-case
+%     m.RtHS.PLinVelEO(1, :, p.DOF_TFA1)  = m.CoordSys.a1 - ( p.AxRedTFA(1,1,p.TTopNode)*x.qt(p.DOF_TFA1) ).*m.CoordSys.a2;
+%     m.RtHS.PLinVelEO(2, :, p.DOF_TFA1)  = [0,0,0] - ( p.AxRedTFA(1,1,p.TTopNode)*x.qdt(p.DOF_TFA1) ).*m.CoordSys.a2;
 %     m.RtHS.LinAccEOt                    = x.qdt(p.DOF_TFA1)*m.RtHS.PLinVelEO(2, :, p.DOF_TFA1);
-    
+%     
     %% (Partial) Linear velocity of the nacelle CoM (point U) in the inertia frame (body E - earth)
-    m.RtHS.PLinVelEU(:,:,:)             = m.RtHS.PLinVelEO(:,:,:);
+%     m.RtHS.PLinVelEU(:,:,:)             = m.RtHS.PLinVelEO(:,:,:);
 
 %     TmpVec0                                 = cross( m.RtHS.PAngVelEN(1, :, p.DOFs.PN(I)), m.RtHS.rOU );
-    TmpVec1                                 = cross( m.RtHS.PAngVelEN(1, :, p.DOF_TFA1), EwNXrOU );
-    TmpVec2                                 = cross( m.RtHS.PAngVelEN(2, :, p.DOF_TFA1), m.RtHS.rOU );
+%     TmpVec1                                 = cross( m.RtHS.PAngVelEN(1, :, p.DOF_TFA1), EwNXrOU );
+%     TmpVec2                                 = cross( m.RtHS.PAngVelEN(2, :, p.DOF_TFA1), m.RtHS.rOU );
 
 %     m.RtHS.PLinVelEU(1, :, p.DOFs.PN(I))    = m.RtHS.PLinVelEU(1, :, p.DOFs.PN(I)) + TmpVec0;
-    m.RtHS.PLinVelEU(2, :, p.DOF_TFA1)    = m.RtHS.PLinVelEU(2, :, p.DOF_TFA1) + TmpVec1 + TmpVec2;
+%     m.RtHS.PLinVelEU(2, :, p.DOF_TFA1)    = m.RtHS.PLinVelEU(2, :, p.DOF_TFA1) + TmpVec1 + TmpVec2;
 
-    m.RtHS.LinAccEUt                        = m.RtHS.LinAccEUt + x.qdt(p.DOF_TFA1)*m.RtHS.PLinVelEU(2, :, p.DOF_TFA1);
+%     m.RtHS.LinAccEUt                        = m.RtHS.LinAccEUt + x.qdt(p.DOF_TFA1)*m.RtHS.PLinVelEU(2, :, p.DOF_TFA1);
     
     %% (Partial) Linear velocity of a point on the furl axis (point V) in the inertia frame (body E - earth)
 %     m.RtHS.PLinVelEV(:,:,:)             = m.RtHS.PLinVelEO(:,:,:);
@@ -103,4 +103,10 @@ function m = CalculateLinearVelPAcc_v1(p, x, m)
 %         m.RtHS.LinAccETt(:,J)                   = x.qdt(p.DOF_TFA1).*m.RtHS.PLinVelET(2, :, p.DOF_TFA1, J);
 %     end
 
+    %% Check 
+%     global CLV1
+%         CLV1    = [CLV1, ([1,0,0] - ( p.AxRedTFA(1,1,p.TTopNode)*x.qt(p.DOF_TFA1) ).*[0,1,0])' ];            % required!
+        
+    %% Partial Linear velocity of the base plate (point O) in the inertia frame (body E - earth) - simplified
+    m.RtHS.PLinVelEO(1, :, p.DOF_TFA1)  = [1,0,0] - ( p.AxRedTFA(1,1,p.TTopNode)*x.qt(p.DOF_TFA1) ).*[0,1,0];
 end

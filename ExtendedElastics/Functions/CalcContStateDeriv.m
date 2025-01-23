@@ -113,8 +113,8 @@ function [u, xdot, m] = CalcContStateDeriv(iStep, u, p, x, m, RK4_stage)
         case 'v4'
             % Initializtation
             u                           = GetInputData_v1(iStep, RK4_stage, u);
-            m                           = SetCoordSy_v1(p, x, m);
-            m                           = CalculatePositions_v1(p, m);
+            m                           = SetCoordSy_v1(m);
+            m                           = CalculatePositions_v1(m);
             m                           = CalculateAngularPosVelPAcc_v1(p, x, m);
             m                           = CalculateLinearVelPAcc_v1(p, x, m);
             m                           = CalculateForcesMoments_v3(p, m, u);
