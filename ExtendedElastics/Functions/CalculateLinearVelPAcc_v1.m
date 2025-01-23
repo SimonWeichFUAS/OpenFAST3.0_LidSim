@@ -17,7 +17,7 @@
 %                       m.RtHS.LinAccEUt    -                       
 %
 % -------------------------------------------------------------------------
-function m = CalculateLinearVelPAcc(p, x, m)
+function m = CalculateLinearVelPAcc_v1(p, x, m)
     
     % Initializations
 %     m.RtHS.LinAccECt(:,:)   = 0.0;
@@ -36,18 +36,16 @@ function m = CalculateLinearVelPAcc(p, x, m)
 %     m.RtHS.LinAccEOt                    = x.qdt(p.DOF_TFA1)*m.RtHS.PLinVelEO(2, :, p.DOF_TFA1);
     
     %% (Partial) Linear velocity of the nacelle CoM (point U) in the inertia frame (body E - earth)
-    m.RtHS.PLinVelEU(:,:,:)             = m.RtHS.PLinVelEO(:,:,:); 
+    m.RtHS.PLinVelEU(:,:,:)             = m.RtHS.PLinVelEO(:,:,:);
 
-    for I = 1:p.DOFs.NPN
-%         TmpVec0                                 = cross( m.RtHS.PAngVelEN(1, :, p.DOFs.PN(I)), m.RtHS.rOU );
-        TmpVec1                                 = cross( m.RtHS.PAngVelEN(1, :, p.DOFs.PN(I)), EwNXrOU );
-        TmpVec2                                 = cross( m.RtHS.PAngVelEN(2, :, p.DOFs.PN(I)), m.RtHS.rOU );
+%     TmpVec0                                 = cross( m.RtHS.PAngVelEN(1, :, p.DOFs.PN(I)), m.RtHS.rOU );
+    TmpVec1                                 = cross( m.RtHS.PAngVelEN(1, :, p.DOF_TFA1), EwNXrOU );
+    TmpVec2                                 = cross( m.RtHS.PAngVelEN(2, :, p.DOF_TFA1), m.RtHS.rOU );
 
-%         m.RtHS.PLinVelEU(1, :, p.DOFs.PN(I))    = m.RtHS.PLinVelEU(1, :, p.DOFs.PN(I)) + TmpVec0;
-        m.RtHS.PLinVelEU(2, :, p.DOFs.PN(I))    = m.RtHS.PLinVelEU(2, :, p.DOFs.PN(I)) + TmpVec1 + TmpVec2;
+%     m.RtHS.PLinVelEU(1, :, p.DOFs.PN(I))    = m.RtHS.PLinVelEU(1, :, p.DOFs.PN(I)) + TmpVec0;
+    m.RtHS.PLinVelEU(2, :, p.DOF_TFA1)    = m.RtHS.PLinVelEU(2, :, p.DOF_TFA1) + TmpVec1 + TmpVec2;
 
-        m.RtHS.LinAccEUt                        = m.RtHS.LinAccEUt + x.qdt(p.DOFs.PN(I))*m.RtHS.PLinVelEU(2, :, p.DOFs.PN(I));
-    end     % All DOFs associated with the angular motion of the nacelle
+    m.RtHS.LinAccEUt                        = m.RtHS.LinAccEUt + x.qdt(p.DOF_TFA1)*m.RtHS.PLinVelEU(2, :, p.DOF_TFA1);
     
     %% (Partial) Linear velocity of a point on the furl axis (point V) in the inertia frame (body E - earth)
 %     m.RtHS.PLinVelEV(:,:,:)             = m.RtHS.PLinVelEO(:,:,:);

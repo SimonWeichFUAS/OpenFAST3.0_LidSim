@@ -5,7 +5,7 @@
 % data structs
 %
 % -------------------------------------------------------------------------
-function u = GetInputData_v1(iStep, RK4_stage, u, p)
+function u = GetInputData_v1(iStep, RK4_stage, u)
 
     iRow    = RK4_stage + (iStep-1)*4;
    
@@ -15,12 +15,12 @@ function u = GetInputData_v1(iStep, RK4_stage, u, p)
 
     % Extract addidional data from ElastoDyn
     % Partial force at point P due to the rotor
-    for L = 1:p.DOFs.NActvDOF
-        for I = 1:3
-            iCol                                = 902 + I + (L-1)*3;
-            u.PFrcPRot(I, L)                    = u.RawDataInp(iRow, iCol);
-        end
-    end
+%     for L = 1:p.DOFs.NActvDOF
+%         for I = 1:3
+%             iCol                                = 902 + I + (L-1)*3;
+%             u.PFrcPRot(I, L)                    = u.RawDataInp(iRow, iCol);
+%         end
+%     end
 
     % Portion of the force at point P due to the rotor
     for I = 1:3
@@ -29,12 +29,12 @@ function u = GetInputData_v1(iStep, RK4_stage, u, p)
     end
 
     % Partial moment at point P due to the rotor
-    for L = 1:p.DOFs.NActvDOF
-        for I = 1:3
-            iCol                                = 911 + I + (L-1)*3;
-            u.PMomLPRot(I, L)                   = u.RawDataInp(iRow, iCol);
-        end
-    end
+%     for L = 1:p.DOFs.NActvDOF
+%         for I = 1:3
+%             iCol                                = 911 + I + (L-1)*3;
+%             u.PMomLPRot(I, L)                   = u.RawDataInp(iRow, iCol);
+%         end
+%     end
 
     % Portion of the moment at point P due to the rotor
     for I = 1:3

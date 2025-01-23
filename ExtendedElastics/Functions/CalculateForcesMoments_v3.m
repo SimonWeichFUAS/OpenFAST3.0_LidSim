@@ -22,7 +22,7 @@
 %                       m.RtHS.MomBNcRtt    - 
 %
 % -------------------------------------------------------------------------
-function m = CalculateForcesMoments_v1(p, m, u)
+function m = CalculateForcesMoments_v3(p, m, u)
     
     %% (Partial) Forces/Moments at the teeter pin (P) due to the rotor
 %     for L = 1:p.DOFs.NActvDOF

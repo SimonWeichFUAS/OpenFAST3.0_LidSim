@@ -18,7 +18,7 @@
 %                       m.RtHS.rVP          -
 % 
 % -------------------------------------------------------------------------
-function m = CalculatePositions(p, m)
+function m = CalculatePositions_v1(p, m)
     
     %% Position vectors between various points on the wind turbine
     m.RtHS.rOU          = p.NacCMxn*m.CoordSys.d1 + p.NacCMzn*m.CoordSys.d2 - p.NacCMyn*m.CoordSys.d3;

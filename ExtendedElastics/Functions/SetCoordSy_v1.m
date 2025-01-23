@@ -22,7 +22,7 @@
 %                       m.CoordSys.z2       -
 %
 % -------------------------------------------------------------------------
-function m = SetCoordSy(p, x, m, u)
+function m = SetCoordSy_v1(p, x, m)
     
     % Inertial frame coordinate system
     m.CoordSys.z1   = [1, 0, 0];        % Vector/direction z1 (=  xi from the IEC coord. system)

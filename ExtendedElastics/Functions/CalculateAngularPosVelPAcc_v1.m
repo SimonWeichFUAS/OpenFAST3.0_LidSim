@@ -19,7 +19,7 @@
 %                       m.RtHS.AngAccENt    - 
 %
 % -------------------------------------------------------------------------
-function m = CalculateAngularPosVelPAcc(p, x, m)
+function m = CalculateAngularPosVelPAcc_v1(p, x, m)
     
     m.RtHS.PAngVelEX(1, :, :)           = 0;
     m.RtHS.AngVelEX                     = [0, 0, 0];
