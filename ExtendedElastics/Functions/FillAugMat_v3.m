@@ -4,13 +4,18 @@
 %
 % -------------------------------------------------------------------------
 %
-% Inputs - Misc.:       m.RtHS.FrcONcRtt - Force acting on yaw bearing
-%                       m.RtHS.MomBNcRtt - Moment acting on yaw bearing
-%                       m.RtHS.PLinVelEO - P.lin.vel. of base plate 
-%                       m.RtHS.PAngVelEB - P.ang.vel. of base plate
-%                       m.RtHS.MomLPRott - Moment acting on hub
-%                       m.RtHS.PAngVelEL - P.ang.vel. of LSS 
-%                  
+% Inputs - Misc.:       m.RtHS.PAngVelEB    -
+%                       m.RtHS.PAngVelEL    -     
+%                       m.RtHS.PLinVelEO    -
+%                       m.RtHS.MomLPRott    -
+%                       m.RtHS.FrcONcRtt    -
+%                       m.RtHS.MomBNcRtt    -
+%
+% -------------------------------------------------------------------------
+%
+% Outputs:              M                   - Mass matrix
+%                       F                   - Forcing vector
+%
 % -------------------------------------------------------------------------
 function [M, F] = FillAugMat_v3(p, x, m, u)
     
