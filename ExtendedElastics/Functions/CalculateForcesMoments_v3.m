@@ -22,7 +22,7 @@
 %                       m.RtHS.MomBNcRtt    - req.
 %
 % -------------------------------------------------------------------------
-function m = CalculateForcesMoments_v3(p, m, u)
+function m = CalculateForcesMoments_v3(p, x, m, u)
     
     %% (Partial) Forces/Moments at the teeter pin (P) due to the rotor
 %     for L = 1:p.DOFs.NActvDOF
@@ -90,9 +90,9 @@ function m = CalculateForcesMoments_v3(p, m, u)
    
     %% Forces/Moments at at the nacelle (N) due to the furling structure - simplified 
     % Influences of the furling structure are neglected
-    TmpVec3                     = cross( m.RtHS.rVP, m.RtHS.FrcPRott );
-    TmpVec                      = p.GenIner*m.CoordSys.c1*dot( m.CoordSys.c1, m.RtHS.AngVelEG );
-    TmpVec5                     = cross( -m.RtHS.AngVelEG, TmpVec );
+    TmpVec3                     = cross( ([1.8025e-02, 4.3494e+00, 0] + [-1.2026e+01, 1.3162e+00, 0]), m.RtHS.FrcPRott );
+    TmpVec                      = p.GenIner*[9.9406e-01, -1.0880e-01, 0]*dot( [9.9406e-01, -1.0880e-01, 0], (x.qdt(p.DOF_TFA1).*[0; 0; -1.4857e-02] + x.qdt(p.DOF_GeAz).*[9.9406e-01; -1.0880e-01; 0]) );
+    TmpVec5                     = cross( -(x.qdt(p.DOF_TFA1).*[0; 0; -1.4857e-02] + x.qdt(p.DOF_GeAz).*[9.9406e-01; -1.0880e-01; 0]), TmpVec );
 
     m.RtHS.FrcVGnRtt            = m.RtHS.FrcPRott;
     m.RtHS.MomNGnRtt            = m.RtHS.MomLPRott + TmpVec3' + TmpVec5';
@@ -102,4 +102,5 @@ function m = CalculateForcesMoments_v3(p, m, u)
     TmpVec2                     = [0;   0;              2.9829e+07];
     m.RtHS.FrcONcRtt            = m.RtHS.FrcVGnRtt + TmpVec1;
     m.RtHS.MomBNcRtt            = m.RtHS.MomNGnRtt + TmpVec2;
+    
 end

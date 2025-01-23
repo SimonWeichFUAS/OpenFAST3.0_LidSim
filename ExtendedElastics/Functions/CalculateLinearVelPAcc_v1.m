@@ -5,8 +5,8 @@
 %
 % -------------------------------------------------------------------------
 %
-% Inputs - Misc.:       m.CoordSys.a1       -
-%                       m.CoordSys.a2       -
+% Inputs - Misc.:       m.CoordSys.a1       - not req. after simplifications
+%                       m.CoordSys.a2       - not req. after simplifications
 %                       m.RtHS.rOU          - not req. after simplifications
 %                       m.RtHS.PAngVelEN    - not req. after simplifications
 %                       m.RtHS.AngVelEN     - not req. after simplifications
@@ -109,4 +109,5 @@ function m = CalculateLinearVelPAcc_v1(p, x, m)
         
     %% Partial Linear velocity of the base plate (point O) in the inertia frame (body E - earth) - simplified
     m.RtHS.PLinVelEO(1, :, p.DOF_TFA1)  = [1,0,0] - ( p.AxRedTFA(1,1,p.TTopNode)*x.qt(p.DOF_TFA1) ).*[0,1,0];
+
 end

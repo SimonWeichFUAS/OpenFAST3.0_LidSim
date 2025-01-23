@@ -97,12 +97,12 @@ function [M, F] = FillAugMat_v3(p, x, m, u)
     M(1)    =   1.2452e+06;                                                 % M11+M12+M13+M14, steady state values
     F(1)    =   5.0450e+03 ...                                              % F11+F12                     
                 - p.KTFA(1,1)*x.qt(1) - p.CTFA(1,1)*x.qdt(1) ...            % F13
-                + dot( m.RtHS.PLinVelEO(1, :, 1), m.RtHS.FrcONcRtt ) ...    % F14
-                + dot( m.RtHS.PAngVelEB(1, :, 1), m.RtHS.MomBNcRtt );       % F15
+                + dot( [1,0,0] - ( p.AxRedTFA(1,1,p.TTopNode)*x.qt(p.DOF_TFA1) ).*[0,1,0], m.RtHS.FrcONcRtt ) ...    % F14
+                + dot( [0, 0, -1.4857e-02], m.RtHS.MomBNcRtt );       % F15
 
     %% Rotor simplified    
     M(2)    =  3.5264e+08; % mean(M22+M21), since it does not change much (should be rotor inertia J of SLOW)
-    F(2)    =  dot( (m.RtHS.PAngVelEL(1, :, 2))', m.RtHS.MomLPRott) ... % (should be M_a of SLOW)
+    F(2)    =  dot( [9.9406e-01; -1.0880e-01; 0], m.RtHS.MomLPRott) ... % (should be M_a of SLOW)
                 - GBoxTrq; % (should be M_g*r_GB
     % F23 is 0
 

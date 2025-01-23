@@ -58,4 +58,5 @@ function m = CalculatePositions_v1(m)
 
     %% Simplified
     m.RtHS.rVP          = [1.8025e-02, 4.3494e+00, 0] + [-1.2026e+01, 1.3162e+00, 0];
+    
 end
