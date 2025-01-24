@@ -22,7 +22,7 @@
 %                       m.RtHS.MomBNcRtt    - req.
 %
 % -------------------------------------------------------------------------
-function m = CalculateForcesMoments_v3(p, x, m, u)
+function [FrcONcRtt,MomBNcRtt] = CalculateForcesMoments_v3(p, x, FrcPRott, MomLPRott)
     
     %% (Partial) Forces/Moments at the teeter pin (P) due to the rotor
 %     for L = 1:p.DOFs.NActvDOF
@@ -33,11 +33,11 @@ function m = CalculateForcesMoments_v3(p, x, m, u)
 %     end
 
     %% Forces/Moments at the teeter pin (P) due to the rotor
-    for I = 1:3
-        m.RtHS.FrcPRott(I,1)        = u.FrcPRott(I, 1);
-        m.RtHS.MomLPRott(I,1)       = u.MomLPRott(I, 1);
-    end
-    
+%     for I = 1:3
+%         m.RtHS.FrcPRott(I,1)        = u.FrcPRott(I, 1);
+%         m.RtHS.MomLPRott(I,1)       = u.MomLPRott(I, 1);
+%     end
+%     
     %% (Partial) Froces/Moments at the nacelle (N) due to the furling structure
 %     m.RtHS.PFrcVGnRt            = m.RtHS.PFrcPRot;
 %     m.RtHS.PMomNGnRt            = m.RtHS.PMomLPRot;  
@@ -90,17 +90,17 @@ function m = CalculateForcesMoments_v3(p, x, m, u)
    
     %% Forces/Moments at at the nacelle (N) due to the furling structure - simplified 
     % Influences of the furling structure are neglected
-    TmpVec3                     = cross( ([1.8025e-02, 4.3494e+00, 0] + [-1.2026e+01, 1.3162e+00, 0]), m.RtHS.FrcPRott );
+    TmpVec3                     = cross( ([1.8025e-02, 4.3494e+00, 0] + [-1.2026e+01, 1.3162e+00, 0]), FrcPRott );
     TmpVec                      = p.GenIner*[9.9406e-01, -1.0880e-01, 0]*dot( [9.9406e-01, -1.0880e-01, 0], (x.qdt(p.DOF_TFA1).*[0; 0; -1.4857e-02] + x.qdt(p.DOF_GeAz).*[9.9406e-01; -1.0880e-01; 0]) );
     TmpVec5                     = cross( -(x.qdt(p.DOF_TFA1).*[0; 0; -1.4857e-02] + x.qdt(p.DOF_GeAz).*[9.9406e-01; -1.0880e-01; 0]), TmpVec );
 
-    m.RtHS.FrcVGnRtt            = m.RtHS.FrcPRott;
-    m.RtHS.MomNGnRtt            = m.RtHS.MomLPRott + TmpVec3' + TmpVec5';
+%     FrcVGnRtt            = FrcPRott;
+    MomNGnRtt            = MomLPRott + TmpVec3' + TmpVec5';
 
     %% Forces/Moments at the yaw bearing (O) - simplified
     TmpVec1                     = [0;   -6.3439e+06;    0]; 
     TmpVec2                     = [0;   0;              2.9829e+07];
-    m.RtHS.FrcONcRtt            = m.RtHS.FrcVGnRtt + TmpVec1;
-    m.RtHS.MomBNcRtt            = m.RtHS.MomNGnRtt + TmpVec2;
+    FrcONcRtt            = FrcPRott + TmpVec1;
+    MomBNcRtt            = MomNGnRtt + TmpVec2;
     
 end

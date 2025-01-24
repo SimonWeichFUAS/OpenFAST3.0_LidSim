@@ -5,7 +5,7 @@
 % data structs
 %
 % -------------------------------------------------------------------------
-function u = GetInputData_v1(iStep, RK4_stage, u)
+function [u,FrcPRott,MomLPRott] = GetInputData_v1(iStep, RK4_stage, u)
 
     iRow    = RK4_stage + (iStep-1)*4;
    
@@ -25,7 +25,7 @@ function u = GetInputData_v1(iStep, RK4_stage, u)
     % Portion of the force at point P due to the rotor
     for I = 1:3
         iCol                                    = 908 + I;
-        u.FrcPRott(I, 1)                        = u.RawDataInp(iRow, iCol);
+        FrcPRott(I, 1)                        = u.RawDataInp(iRow, iCol);
     end
 
     % Partial moment at point P due to the rotor
@@ -39,7 +39,7 @@ function u = GetInputData_v1(iStep, RK4_stage, u)
     % Portion of the moment at point P due to the rotor
     for I = 1:3
         iCol                                    = 917 + I;
-        u.MomLPRott(I, 1)                       = u.RawDataInp(iRow, iCol);
+        MomLPRott(I, 1)                       = u.RawDataInp(iRow, iCol);
     end
     
 end
