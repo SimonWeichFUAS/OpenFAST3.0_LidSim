@@ -5,21 +5,28 @@
 %
 % -------------------------------------------------------------------------
 %
-% Inputs - Misc.:       m.CoordSys.c1       - req. 
-%                       m.CoordSys.d2       - not req. after simplifications
-%                       m.CoordSys.z2       - not req. after simplifications      
-%                       m.RtHS.rOU          - not req. after simplifications 
-%                       m.RtHS.rVP          - req.
-%                       m.RtHS.AngVelEG     - req.
-%       	            m.RtHS.AngAccEGt    - not req. after simplifications
-%                       m.RtHS.AngAccENt    - not req. after simplifications
-%                       m.RtHS.LinAccEUt    - not req. after simplifications                      
+% Inputs - Loads:       FrcPRott            - force at the teeter pin 
+%                                           (point P) due to the rotor   
+%                       
+%                       MomLPRott           - moment at the teeter pin 
+%                                           (point P) on the low-speed shaft 
+%                                           (body L) due to the rotor
+%
+% Inputs - Params.:     GenIner             - Generator inertia about HSS%
+%
+% Inputs - States:      qdt                 - Current estimate of QD 
+%                                           (velocity matrix) for each DOF
 %
 % -------------------------------------------------------------------------
 %
-% Outputs:              m.RtHS.MomLPRott    - req.      
-%                       m.RtHS.FrcONcRtt    - req.
-%                       m.RtHS.MomBNcRtt    - req.
+% Outputs:              FrcONcRtt           - force at yaw bearing 
+%                                           (point O) due to the nacelle, 
+%                                           generator, and rotor
+%
+%                       MomBNcRtt           - moment at the base plate 
+%                                           (body B) / yaw bearing (point O) 
+%                                           due to the nacelle, generator, 
+%                                           and rotor
 %
 % -------------------------------------------------------------------------
 function [FrcONcRtt,MomBNcRtt] = CalculateForcesMoments_v3(p, x, FrcPRott, MomLPRott)
@@ -91,8 +98,8 @@ function [FrcONcRtt,MomBNcRtt] = CalculateForcesMoments_v3(p, x, FrcPRott, MomLP
     %% Forces/Moments at at the nacelle (N) due to the furling structure - simplified 
     % Influences of the furling structure are neglected
     TmpVec3                     = cross( ([1.8025e-02, 4.3494e+00, 0] + [-1.2026e+01, 1.3162e+00, 0]), FrcPRott );
-    TmpVec                      = p.GenIner*[9.9406e-01, -1.0880e-01, 0]*dot( [9.9406e-01, -1.0880e-01, 0], (x.qdt(p.DOF_TFA1).*[0; 0; -1.4857e-02] + x.qdt(p.DOF_GeAz).*[9.9406e-01; -1.0880e-01; 0]) );
-    TmpVec5                     = cross( -(x.qdt(p.DOF_TFA1).*[0; 0; -1.4857e-02] + x.qdt(p.DOF_GeAz).*[9.9406e-01; -1.0880e-01; 0]), TmpVec );
+    TmpVec                      = p.GenIner*[9.9406e-01, -1.0880e-01, 0]*dot( [9.9406e-01, -1.0880e-01, 0], (x.qdt(1).*[0; 0; -1.4857e-02] + x.qdt(2).*[9.9406e-01; -1.0880e-01; 0]) );
+    TmpVec5                     = cross( -(x.qdt(1).*[0; 0; -1.4857e-02] + x.qdt(2).*[9.9406e-01; -1.0880e-01; 0]), TmpVec );
 
 %     FrcVGnRtt            = FrcPRott;
     MomNGnRtt            = MomLPRott + TmpVec3' + TmpVec5';

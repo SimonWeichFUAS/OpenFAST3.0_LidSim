@@ -4,9 +4,40 @@
 %
 % -------------------------------------------------------------------------
 %
-% Inputs - Misc.:       MomLPRott    -
-%                       FrcONcRtt    -
-%                       MomBNcRtt    -
+% Inputs - Loads:       MomLPRott           - moment at the teeter pin 
+%                                           (point P) on the low-speed 
+%                                           shaft (body L) due to the rotor
+%
+%                       FrcONcRtt           - force at yaw bearing 
+%                                           (point O) due to the nacelle, 
+%                                           generator, and rotor
+%
+%                       MomBNcRtt           - moment at the base plate 
+%                                           (body B) / yaw bearing 
+%                                           (point O) due to the nacelle, 
+%                                           generator, and rotor
+%
+% Inputs - Params.:     GBRatio             - Gearbox ratio
+%
+%                       KTFA                - Generalized stiffness of 
+%                                           tower in fore-aft direction
+%
+%                       CTFA                - Generalized damping of tower 
+%                                           in fore-aft direction
+%
+%                       AxRedTFA            - The axial-reduction terms 
+%                                           for the fore-aft tower mode 
+%                                           shapes
+% 
+%                       TTopNode            - Index of the additional node 
+%                                           located at the tower-top
+%
+% Inputs - States:      qt                  - Current estimate of Q 
+%                                           (displacement matrix) for each
+%                                           DOF
+% 
+%                       qdt                 - Current estimate of QD 
+%                                           (velocity matrix) for each DOF
 %
 % -------------------------------------------------------------------------
 %
@@ -14,12 +45,12 @@
 %                       F                   - Forcing vector
 %
 % -------------------------------------------------------------------------
-function [M, F] = FillAugMat_v3(p, x, MomLPRott, FrcONcRtt, MomBNcRtt, u)
+function [M, F] = FillAugMat_v3(p, x, MomLPRott,FrcONcRtt,MomBNcRtt, GenTrq)
     
     %% Initialize the matrix ;
     M               = NaN(2,1);
     F               = NaN(2,1);
-    GBoxTrq         = u.GenTrq * p.GBRatio;
+    GBoxTrq         = GenTrq * p.GBRatio;
 
     %% Tower original
 %     M(1)        = p.YawBrMas * dot( m.RtHS.PLinVelEO(1, :, 1), m.RtHS.PLinVelEO(1, :, 1));
@@ -94,7 +125,7 @@ function [M, F] = FillAugMat_v3(p, x, MomLPRott, FrcONcRtt, MomBNcRtt, u)
     M(1)    =   1.2452e+06;                                                 % M11+M12+M13+M14, steady state values
     F(1)    =   5.0450e+03 ...                                              % F11+F12                     
                 - p.KTFA(1,1)*x.qt(1) - p.CTFA(1,1)*x.qdt(1) ...            % F13
-                + dot( [1,0,0] - ( p.AxRedTFA(1,1,p.TTopNode)*x.qt(p.DOF_TFA1) ).*[0,1,0], FrcONcRtt ) ...    % F14
+                + dot( [1,0,0] - ( p.AxRedTFA(1,1,p.TTopNode)*x.qt(1) ).*[0,1,0], FrcONcRtt ) ...    % F14
                 + dot( [0, 0, -1.4857e-02], MomBNcRtt );       % F15
 
     %% Rotor simplified    
