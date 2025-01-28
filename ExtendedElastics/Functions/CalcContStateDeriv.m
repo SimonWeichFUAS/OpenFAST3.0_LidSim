@@ -123,7 +123,7 @@ function [u, xdot, m] = CalcContStateDeriv(iStep, u, p, x, m, RK4_stage)
 %             m                                     = CalculatePositions_v1(m);
 %             m                                     = CalculateAngularPosVelPAcc_v1(p, x, m);
 %             m                                     = CalculateLinearVelPAcc_v1(p, x, m);
-            [FrcONcRtt,MomBNcRtt]                   = CalculateForcesMoments_v3(p, x, FrcPRott,MomLPRott);
+            [FrcONcRtt,MomBNcRtt]                   = CalculateForcesMoments_v4(p, x, FrcPRott,MomLPRott);
 
             % Population of the augmented matrix
             [M, F]                                  = FillAugMat_v3(p, x, MomLPRott,FrcONcRtt,MomBNcRtt, GenTrq);
