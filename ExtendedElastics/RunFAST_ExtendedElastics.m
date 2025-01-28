@@ -26,6 +26,14 @@
 
 clearvars; close all; clc
 
+% global F21 F22 F23 M21 M22
+% global F11 F12 F13 F14 F15 M11 M12 M13 M14
+% global CFM1 CFM2 CFM3 CFM4 CFM5 CFM6 CFM7
+% global CLV1
+% global CAV1 CAV2 CAV3
+% global CPS1 CPS2 CPS3 CPS4
+% global SCS1
+
 addpath(genpath('Model'))
 addpath(genpath('Functions'))
 addpath(genpath('..\..\WetiMatlabFunctions'))
@@ -86,7 +94,8 @@ fprintf(['Simulation started on %02d-%s-%04d' ...
             cdt(3),datestr(cdt,'mmm'),cdt(1),cdt(4),cdt(5),round(cdt(6)))
 tStartTimer                 = tic;
 
-for iStep = 1:p.Tend/p.dt
+n_t = p.Tend/p.dt;
+for iStep = 1:n_t
     
     [u, x, m]   = UpdateStates(iStep, u, p, x, m);
     m           = CalcOutputs(p, x, m);
@@ -97,15 +106,15 @@ end
 tEndTimer                   = toc(tStartTimer);
 fprintf(['Simulation finished after %2.2f seconds!\n'], tEndTimer)
 
-%% Plot results
+%% Plot results / Calculate MRE
 
 if PlotResults
     
     % Allocate channels
-    Time            = Binaries.Time;
-    RotSpeed_FAST   = Binaries.RotSpeed;
+    Time            = Binaries.Time(1:n_t+1);
+    RotSpeed_FAST   = Binaries.RotSpeed(1:n_t+1);
     RotSpeed_ExEl   = y.RotSpeed;
-    TTDspFA_FAST    = Binaries.TTDspFA;
+    TTDspFA_FAST    = Binaries.TTDspFA(1:n_t+1);
     TTDspFA_ExEl    = y.TTDspFA;
     
     % Display ExElvsFAST comparison
@@ -137,13 +146,11 @@ if PlotResults
     ylabel({'TTdispFA'; '[%]'})
     xlabel('time [s]')
 
+    % Calculate MRE of RotSpeed and TTDspFA
+    mRelErr_RotSpeed        = mean((RotSpeed_FAST-radPs2rpm(RotSpeed_ExEl))./p.RotSpeed);
+    mRelErr_TTDspFA         = mean((TTDspFA_FAST-TTDspFA_ExEl)./p.TTDspFA);
+
+    fprintf(['The mean relative error of the rotor speed is: %26.6e\n'],               mRelErr_RotSpeed)
+    fprintf(['The mean relative error of the tower-top displacement is: %15.6e\n'],    mRelErr_TTDspFA)
+
 end
-
-%% Calculate MRE of RotSpeed and TTDspFA
-mRelErr_RotSpeed        = mean((RotSpeed_FAST-radPs2rpm(RotSpeed_ExEl))./p.RotSpeed);
-mRelErr_TTDspFA         = mean((TTDspFA_FAST-TTDspFA_ExEl)./p.TTDspFA);
-
-fprintf(['The mean relative error of the rotor speed is: %26.6e\n'],               mRelErr_RotSpeed)
-fprintf(['The mean relative error of the tower-top displacement is: %15.6e\n'],    mRelErr_TTDspFA)
-
-

@@ -27,6 +27,12 @@
 %               to reduce the number of inputs compared to previous modes,
 %               the computation of partial loads has been re-integrated
 %               into the framework.
+%
+%       - v4:   This mode resembles further simplifications of the whole
+%               framwork, where the whole set-up process of determining
+%               coordinate systems and calculating loads, motions etc. is
+%               concentrated into one calulation script and the main
+%               function, which populates the augmentes matrix.
 %                               
 % -------------------------------------------------------------------------
 function [u, xdot, m] = CalcContStateDeriv(iStep, u, p, x, m, RK4_stage)
@@ -109,6 +115,21 @@ function [u, xdot, m] = CalcContStateDeriv(iStep, u, p, x, m, RK4_stage)
             m.SolnVec                   = m.AugMat( p.DOFs.SrtPS(1:p.DOFs.NActvDOF), p.DOFs.SrtPSNAUG(1+p.DOFs.NActvDOF));
 
             m.SolnVec                   = m.SolnVec ./ m.AugMat_factor;
+			
+		case 'v4'
+            % Initializtation
+            [FrcPRott,MomLPRott, GenTrq]            = GetInputData_v1(iStep, RK4_stage, u);
+%             m                                     = SetCoordSy_v1(m);
+%             m                                     = CalculatePositions_v1(m);
+%             m                                     = CalculateAngularPosVelPAcc_v1(p, x, m);
+%             m                                     = CalculateLinearVelPAcc_v1(p, x, m);
+            [FrcONcRtt,MomBNcRtt]                   = CalculateForcesMoments_v4(p, x, FrcPRott,MomLPRott);
+
+            % Population of the augmented matrix
+            [M, F]                                  = FillAugMat_v3(p, x, MomLPRott,FrcONcRtt,MomBNcRtt, GenTrq);
+            
+            % Computaion of the approximated accelerations
+            m.SolnVec                               = F./M;
 
         case 'v5'
             % Initializtation

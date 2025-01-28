@@ -1468,3 +1468,4 @@ vs-build/MAPlib/MAP_dll.vcxproj
 vs-build/gitVersionInfo.h
 vs-build/FASTlib/FASTlib.vfproj
 vs-build/FAST/FAST.vfproj
+*.asv

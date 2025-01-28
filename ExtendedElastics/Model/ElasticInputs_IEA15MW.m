@@ -10,7 +10,7 @@ function [InputFileData] = ElasticInputs_IEA15MW
 %% Simulation Control
 InputFileData.dt            = 0.01;                 % [s]     Integration time step
 InputFileData.Tend          = 30.0;                 % [s]     Total simulation time (not included in original ElastoDyn.dat)
-InputFileData.SimMode       = 'v0';                 % [str]   Simulation mode for 'CalcContStateDeriv'
+InputFileData.SimMode       = 'v4';                 % [str]   Simulation mode for 'CalcContStateDeriv'
 
 %% Environmental Conditions
 InputFileData.Gravity       = 9.80665;              % [m/s^2] Gravitational acceleration
