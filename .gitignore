@@ -1469,3 +1469,10 @@ vs-build/gitVersionInfo.h
 vs-build/FASTlib/FASTlib.vfproj
 vs-build/FAST/FAST.vfproj
 *.asv
+*.png
+*.outb
+!Tilt6deg_TFA1on_Cone4deg.outb
+*.txt
+*.mat
+!PowerAndThrustCoefficientsIEA15MWMonopile_only2DOF_adjAeroDyn.mat
+!Tilt6deg_TFA1on_Cone4deg.mat
